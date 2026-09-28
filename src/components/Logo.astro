@@ -1,0 +1,39 @@
+---
+// Logo: a pipe elbow with a falling drop, plus the business name from the config.
+import { site } from '../config/site.config';
+
+interface Props { dark?: boolean }
+const { dark = false } = Astro.props;
+---
+<a href="/" class:list={['logo', { dark }]}>
+  <svg class="mark" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+    <rect width="48" height="48" rx="12" fill="var(--c-ink)" />
+    <path d="M12 38V22a8 8 0 0 1 8-8h16" fill="none" stroke="var(--c-orange)" stroke-width="7" stroke-linecap="butt" />
+    <rect x="8" y="33" width="15" height="5" rx="1.5" fill="var(--c-orange)" />
+    <rect x="31" y="9.5" width="5" height="15" rx="1.5" fill="var(--c-orange)" transform="rotate(0)" />
+    <path class="drop" d="M36 29c0 0-4 4.4-4 7a4 4 0 0 0 8 0c0-2.6-4-7-4-7z" fill="#7CC3FF" />
+  </svg>
+  <span class="text">
+    <span class="name">{site.shortName}</span>
+    <span class="trade">{site.trade} · 24/7</span>
+  </span>
+  <span class="visually-hidden">, לדף הבית</span>
+</a>
+
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.7rem; text-decoration: none; color: var(--c-ink); }
+  .logo.dark { color: #fff; }
+  .mark { flex: none; }
+  .text { display: grid; line-height: 1.05; }
+  .name { font: 800 1.35rem/1.05 var(--font-display); letter-spacing: -0.01em; }
+  .trade { font: 600 0.8rem/1.2 var(--font-display); color: var(--c-orange-deep); margin-top: 0.2rem; }
+  .dark .trade { color: var(--c-orange); }
+  @media (prefers-reduced-motion: no-preference) {
+    .logo:hover .drop { animation: drip 900ms var(--ease); }
+  }
+  @keyframes drip {
+    0% { transform: translateY(-6px); opacity: 0; }
+    60% { opacity: 1; }
+    100% { transform: translateY(0); }
+  }
+</style>

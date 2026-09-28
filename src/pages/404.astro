@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { services, contact, telUrl } from '../config/site.config';
+---
+<BaseLayout title="העמוד לא נמצא" description="העמוד שחיפשתם לא נמצא. אולי הוא הועבר, והנה העמודים שהכי מחפשים." noindex>
+  <section class="nf blueprint on-dark">
+    <div class="container">
+      <p class="code" aria-hidden="true">404</p>
+      <h1>הצינור הזה <span>לא מוביל לשום מקום.</span></h1>
+      <p class="lead">העמוד שחיפשתם לא נמצא. אולי אחד מאלה?</p>
+      <ul>
+        {services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.navTitle}</a></li>)}
+      </ul>
+      <div class="actions">
+        <a class="btn" href="/">לדף הבית <Icon name="arrow" size={18} /></a>
+        <a class="btn btn--ghost" href={telUrl}><Icon name="phone" size={18} /><span class="ltr">{contact.phone}</span></a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { color: #fff; min-height: 70svh; padding-block: var(--space-9); }
+  .code { font: 800 clamp(6rem, 18vw, 11rem)/1 var(--font-display); color: transparent; -webkit-text-stroke: 2px var(--c-orange); margin: 0 0 1rem; }
+  h1 span { display: block; color: var(--c-orange); }
+  .lead { color: var(--c-on-dark-muted); }
+  ul { list-style: none; padding: 0; margin: var(--space-5) 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  ul a { display: inline-block; min-height: 44px; padding: 0.55rem 1rem; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.25); color: #fff; text-decoration: none; }
+  ul a:hover { border-color: var(--c-orange); color: var(--c-orange); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+</style>

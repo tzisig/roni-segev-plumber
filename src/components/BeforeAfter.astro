@@ -1,0 +1,71 @@
+---
+// Before/after comparison: drag the handle (or use the arrow keys) to reveal the "before" photo.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  before: ImageMetadata;
+  after: ImageMetadata;
+  beforeAlt: string;
+  afterAlt: string;
+  /** Accessible name of the slider. */
+  label: string;
+  sizes?: string;
+  /** Load eagerly when the slider is the first thing on screen. */
+  eager?: boolean;
+}
+const { before, after, beforeAlt, afterAlt, label, sizes = '(min-width: 1000px) 560px, 100vw', eager = false } = Astro.props;
+const loading = eager ? 'eager' : 'lazy';
+---
+<div class="ba" style="--pos: 50" data-ba>
+  <Image class="ba-after" src={after} alt={afterAlt} widths={[480, 800, 1100]} sizes={sizes} loading={loading} />
+  <div class="ba-before">
+    <Image src={before} alt={beforeAlt} widths={[480, 800, 1100]} sizes={sizes} loading={loading} />
+  </div>
+  <span class="lbl lbl-before" aria-hidden="true">לפני</span>
+  <span class="lbl lbl-after" aria-hidden="true">אחרי</span>
+  <span class="handle" aria-hidden="true"><span class="knob"><Icon name="swap" size={20} /></span></span>
+  <input type="range" min="0" max="100" value="50" aria-label={label} aria-valuetext="50% לפני" data-ba-input />
+</div>
+
+<style>
+  .ba {
+    position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius-l); overflow: hidden;
+    background: var(--c-mist); user-select: none; touch-action: pan-y; isolation: isolate;
+  }
+  .ba :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* RTL: "before" is shown on the right side, its width is --pos percent */
+  .ba-before { position: absolute; inset: 0; clip-path: inset(0 0 0 calc(100% - var(--pos) * 1%)); }
+  .handle {
+    position: absolute; top: 0; bottom: 0; right: calc(var(--pos) * 1%); width: 3px; background: #fff;
+    transform: translateX(50%); box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08); pointer-events: none; z-index: 2;
+  }
+  .knob {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+    background: var(--c-orange); color: var(--c-ink); box-shadow: 0 6px 18px -4px rgb(0 0 0 / 0.4);
+  }
+  .lbl {
+    position: absolute; top: 0.9rem; z-index: 3; padding: 0.25rem 0.75rem; border-radius: 999px;
+    font: 700 0.85rem var(--font-display); background: rgb(10 34 64 / 0.8); color: #fff; pointer-events: none;
+  }
+  .lbl-before { right: 0.9rem; }
+  .lbl-after { left: 0.9rem; background: var(--c-orange); color: var(--c-ink); }
+  input[type='range'] {
+    position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0;
+    opacity: 0; cursor: ew-resize; z-index: 4; border: 0;
+  }
+  .ba:has(input:focus-visible) { outline: 3px solid var(--c-orange); outline-offset: 3px; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-ba]').forEach((el) => {
+    const input = el.querySelector<HTMLInputElement>('[data-ba-input]')!;
+    const update = () => {
+      el.style.setProperty('--pos', input.value);
+      input.setAttribute('aria-valuetext', `${input.value}% לפני`);
+    };
+    input.addEventListener('input', update);
+  });
+</script>

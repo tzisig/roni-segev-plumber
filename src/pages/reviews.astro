@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Stars from '../components/Stars.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { testimonials, stats, social } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'המלצות' }];
+// Share of reviews per star value, for the rating bars
+const dist = [5, 4, 3, 2, 1].map((n) => ({ n, count: testimonials.filter((t) => t.rating === n).length }));
+---
+<BaseLayout
+  title="המלצות לקוחות מחיפה והקריות"
+  description={`${stats.rating} מתוך 5 ב-${stats.reviewCount} ביקורות: לקוחות מחיפה, קריית אתא, ביאליק, מוצקין וקריית ים מספרים על השירות של רוני שגב, אינסטלטור 24/7.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    eyebrow="המלצות"
+    title="מה הלקוחות מספרים"
+    lead="שם, שכונה וסוג העבודה. רוב הלקוחות שלנו מגיעים מהמלצה של שכן, וזה הציון שהכי חשוב לנו."
+    crumbs={crumbs}
+  />
+
+  <section class="section">
+    <div class="container">
+      <div class="summary">
+        <div class="score">
+          <span class="big">{stats.rating}</span>
+          <Stars rating={stats.rating} size={24} />
+          <p>{stats.reviewCount} ביקורות{stats.reviewSource && ` ב-${stats.reviewSource}`}</p>
+          {social.google && <a class="btn btn--ghost" href={social.google} target="_blank" rel="noopener">לכל הביקורות בגוגל</a>}
+        </div>
+        <div class="bars">
+          <p class="bars-title">התפלגות ההמלצות בעמוד</p>
+          {dist.map((d) => (
+            <div class="bar-row">
+              <span class="ltr">{d.n}★</span>
+              <span class="bar"><span style={`width:${(d.count / testimonials.length) * 100}%`}></span></span>
+              <span class="count">{d.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <h2 class="visually-hidden">כל ההמלצות</h2>
+      <div class="grid grid--3 list">
+        {testimonials.map((t, i) => <div class="reveal" data-delay={String(i % 3)}><TestimonialCard t={t} /></div>)}
+      </div>
+    </div>
+  </section>
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .summary { display: grid; gap: var(--space-5); margin-bottom: var(--space-7); padding: 1.5rem; border-radius: var(--radius-l); background: var(--c-mist); }
+  @media (min-width: 800px) { .summary { grid-template-columns: 280px 1fr; align-items: center; } }
+  .score { display: grid; justify-items: start; gap: 0.3rem; }
+  .big { font: 800 4rem/1 var(--font-display); }
+  .score p { margin: 0; color: var(--c-muted); }
+  .bars-title { font-weight: 700; margin-bottom: 0.5rem; }
+  .bar-row { display: grid; grid-template-columns: 2.5rem 1fr 2rem; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; }
+  .bar { height: 10px; border-radius: 5px; background: #fff; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: #F5A524; border-radius: 5px; }
+  .count { color: var(--c-muted); font-size: 0.9rem; }
+</style>

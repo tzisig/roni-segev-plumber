@@ -1,0 +1,108 @@
+---
+// "What happened?" picker: choose the problem, get first steps and a prefilled WhatsApp message.
+// Without JavaScript every panel is shown, one after the other.
+import Icon from './Icon.astro';
+import { triage, contact, telUrl, whatsappUrl, serviceBySlug } from '../config/site.config';
+
+interface Props { id?: string; headingLevel?: 'h2' | 'h3' }
+const { id = 'triage', headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+---
+<div class="triage" data-triage>
+  <div class="picker" role="group" aria-label="בחרו מה קרה">
+    {triage.map((t, i) => (
+      <button type="button" class="opt" aria-pressed={i === 0 ? 'true' : 'false'} aria-controls={`${id}-${t.id}`} data-triage-btn={t.id}>
+        <span class:list={['opt-icon', t.urgency]}><Icon name={t.icon} size={22} /></span>
+        <span class="opt-label">{t.label}</span>
+      </button>
+    ))}
+  </div>
+
+  <div class="panels" aria-live="polite">
+    {triage.map((t, i) => {
+      const svc = serviceBySlug(t.service);
+      return (
+        <section class="panel" id={`${id}-${t.id}`} data-triage-panel={t.id} data-active={i === 0 ? 'true' : 'false'} aria-label={t.label}>
+          <div class="panel-head">
+            <span class:list={['badge', t.urgency]}>
+              <Icon name={t.urgency === 'high' ? 'alert' : 'clock'} size={16} />
+              {t.urgency === 'high' ? 'דחוף: התקשרו עכשיו' : 'כדאי לטפל היום'}
+            </span>
+            <H class="panel-title">{t.label}: מה עושים עד שרוני מגיע</H>
+          </div>
+          <ol class="todo">
+            {t.steps.map((s) => <li>{s}</li>)}
+          </ol>
+          <div class="panel-cta">
+            <a class="btn" href={telUrl}><Icon name="phone" size={20} /><span>התקשרו: <span class="ltr">{contact.phone}</span></span></a>
+            <a class="btn btn--wa" href={whatsappUrl(t.whatsappText)} target="_blank" rel="noopener">
+              <Icon name="whatsapp" size={20} /><span>שלחו תמונה בוואטסאפ</span><span class="visually-hidden">(נפתח בחלון חדש)</span>
+            </a>
+          </div>
+          {svc && <a class="link-arrow more" href={`/services/${svc.slug}/`}>עוד על {svc.navTitle}<Icon name="arrow" size={18} /></a>}
+        </section>
+      );
+    })}
+  </div>
+</div>
+
+<style>
+  .triage { display: grid; gap: var(--space-5); }
+  @media (min-width: 960px) { .triage { grid-template-columns: 0.9fr 1.3fr; align-items: start; } }
+
+  .picker { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  @media (min-width: 960px) { .picker { grid-template-columns: 1fr; } }
+  .opt {
+    display: flex; align-items: center; gap: 0.75rem; width: 100%; min-height: 60px; padding: 0.6rem 0.8rem;
+    text-align: start; font: 600 0.98rem/1.25 var(--font-display); color: #fff; cursor: pointer;
+    background: rgb(255 255 255 / 0.06); border: 1.5px solid rgb(255 255 255 / 0.14); border-radius: 14px;
+    transition: background-color 180ms, border-color 180ms, transform 180ms var(--ease);
+  }
+  .opt:hover { background: rgb(255 255 255 / 0.1); }
+  .opt[aria-pressed='true'] { background: #fff; color: var(--c-ink); border-color: #fff; }
+  .opt-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; flex: none; background: rgb(21 87 176 / 0.35); color: #9CCBFF; }
+  .opt-icon.high { background: rgb(255 122 26 / 0.2); color: var(--c-orange); }
+  .opt[aria-pressed='true'] .opt-icon { background: var(--c-blue-soft); color: var(--c-blue); }
+  .opt[aria-pressed='true'] .opt-icon.high { background: var(--c-orange-soft); color: var(--c-orange-deep); }
+
+  .panel {
+    background: #fff; color: var(--c-text); border-radius: var(--radius-l); padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.55);
+  }
+  /* With JS only the active panel is shown; without JS all panels stay visible */
+  :global(html:not(.no-js)) .panel[data-active='false'] { display: none; }
+  :global(html.no-js) .panel + .panel { margin-top: var(--space-4); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.75rem; border-radius: 999px;
+    font: 700 0.85rem var(--font-display); background: var(--c-blue-soft); color: var(--c-blue);
+  }
+  .badge.high { background: var(--c-orange-soft); color: var(--c-orange-deep); }
+  .panel-title { margin: 0.75rem 0 1rem; font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem); }
+  .todo { counter-reset: todo; list-style: none; padding: 0; margin: 0 0 1.25rem; display: grid; gap: 0.8rem; }
+  .todo li { counter-increment: todo; position: relative; padding-inline-start: 2.6rem; }
+  .todo li::before {
+    content: counter(todo); position: absolute; inset-inline-start: 0; top: 0.05rem; display: grid; place-items: center;
+    width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--c-ink); color: #fff; font: 700 0.9rem var(--font-display);
+  }
+  .panel-cta { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .panel-cta .btn { flex: 1 1 220px; min-height: 50px; font-size: 1rem; }
+  .panel .more { margin-top: 1rem; color: var(--c-blue); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-triage]').forEach((root) => {
+    const buttons = root.querySelectorAll<HTMLButtonElement>('[data-triage-btn]');
+    const panels = root.querySelectorAll<HTMLElement>('[data-triage-panel]');
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.triageBtn;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        panels.forEach((p) => (p.dataset.active = String(p.dataset.triagePanel === id)));
+        // On small screens the panel is below the picker: bring it into view
+        if (window.matchMedia('(max-width: 959px)').matches) {
+          root.querySelector<HTMLElement>(`[data-triage-panel="${id}"]`)?.scrollIntoView({ block: 'start' });
+        }
+      }),
+    );
+  });
+</script>

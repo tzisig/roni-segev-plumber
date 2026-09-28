@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { site, contact, legal, formatDate, telUrl } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'הצהרת נגישות' }];
+---
+<BaseLayout title="הצהרת נגישות" description={`הצהרת הנגישות של אתר ${site.name}: רמת הנגישות, מה עשינו באתר ופרטי רכז הנגישות.`} schema={[breadcrumbSchema(crumbs)]}>
+  <PageHero title="הצהרת נגישות" lead={`עודכן לאחרונה: ${formatDate(legal.accessibilityReviewed)}`} crumbs={crumbs} cta={false} />
+  <section class="section">
+    <div class="narrow prose">
+      <p>אנחנו רואים חשיבות רבה במתן שירות שווה לכל אדם, כולל אנשים עם מוגבלות. האתר נבנה כך שיהיה נגיש, בהתאם לתקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), התשע"ג-2013.</p>
+
+      <h2>רמת הנגישות</h2>
+      <p>האתר נבנה בהתאם לתקן הישראלי ת"י 5568, המבוסס על הנחיות WCAG 2.0 ברמה AA.</p>
+
+      <h2>מה עשינו באתר</h2>
+      <ul>
+        <li>ניווט מלא במקלדת, כולל התפריט, בוחר התקלות, השוואות לפני ואחרי, שאלות נפוצות וטפסים, עם סימון ברור של הרכיב הפעיל.</li>
+        <li>קישור "דלגו לתוכן הראשי" בתחילת כל עמוד.</li>
+        <li>ניגודיות צבעים לפי דרישות רמה AA.</li>
+        <li>מבנה כותרות היררכי, תיאור טקסטואלי לתמונות משמעותיות ותוויות לכל שדות הטופס.</li>
+        <li>מפת אזורי השירות מלווה ברשימה טקסטואלית עם אותו מידע.</li>
+        <li>התאמה לכל גדלי המסך ואפשרות הגדלת טקסט עד 200% בלי אובדן תוכן.</li>
+        <li>כיבוד הגדרת "הפחתת תנועה" של מערכת ההפעלה: אנימציות מבוטלות אוטומטית.</li>
+        <li>הנגישות מובנית בקוד האתר ואינה נשענת על תוסף נגישות חיצוני.</li>
+      </ul>
+
+      <h2>נגישות השירות</h2>
+      <p>השירות ניתן בבית הלקוח. אפשר לפנות אלינו בטלפון, בוואטסאפ (כולל הודעה כתובה או תמונה), במייל או דרך הטופס באתר, לפי מה שנוח לכם.</p>
+
+      <h2>נתקלתם בבעיה?</h2>
+      <p>אם מצאתם רכיב שאינו נגיש, נשמח לדעת ולתקן. פרטי רכז הנגישות:</p>
+      <ul>
+        <li>שם: {legal.accessibilityCoordinator}</li>
+        <li>טלפון: <a href={telUrl} class="ltr">{contact.phone}</a></li>
+        <li>מייל: <a href={`mailto:${legal.accessibilityEmail}`}>{legal.accessibilityEmail}</a></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { contact, site, areas, telUrl, whatsappUrl } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'צור קשר' }];
+---
+<BaseLayout
+  title="צור קשר עם רוני שגב, אינסטלטור 24/7"
+  description={`התקשרו ל-${contact.phone} או שלחו וואטסאפ. רוני שגב, אינסטלטור בחיפה והקריות, זמין 24/7 ומגיע תוך ${contact.arrival.min}-${contact.arrival.max} דקות.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    eyebrow="צור קשר"
+    title="הכי מהר: טלפון או וואטסאפ"
+    lead="בתקלה דחופה, התקשרו. לעבודה מתוכננת אפשר גם לשלוח תמונה בוואטסאפ או להשאיר פרטים בטופס, ורוני יחזור אליכם."
+    crumbs={crumbs}
+  />
+
+  <section class="section">
+    <div class="container grid-c">
+      <div class="channels">
+        <a class="ch ch-call" href={telUrl}>
+          <span class="ch-icon"><Icon name="phone" size={28} /></span>
+          <span class="ch-text"><strong>התקשרו</strong><span class="ltr big">{contact.phone}</span><span>{contact.responsePromise}</span></span>
+        </a>
+        <a class="ch ch-wa" href={whatsappUrl()} target="_blank" rel="noopener">
+          <span class="ch-icon"><Icon name="whatsapp" size={28} /></span>
+          <span class="ch-text"><strong>וואטסאפ</strong><span>שלחו תמונה של התקלה וקבלו הערכת מחיר</span></span>
+          <span class="visually-hidden">(נפתח בחלון חדש)</span>
+        </a>
+        <a class="ch" href={`mailto:${contact.email}`}>
+          <span class="ch-icon"><Icon name="mail" size={26} /></span>
+          <span class="ch-text"><strong>מייל</strong><span class="ltr">{contact.email}</span></span>
+        </a>
+
+        <div class="info">
+          <h2 class="info-title"><Icon name="clock" size={22} />שעות זמינות</h2>
+          <dl>
+            {contact.hours.map((h) => <div><dt>{h.days}</dt><dd>{h.time}</dd></div>)}
+          </dl>
+          <p class="muted small">{contact.afterHoursNote}</p>
+          <h2 class="info-title"><Icon name="pin" size={22} />אזורי שירות</h2>
+          <p>{site.region}: {areas.map((a) => a.name).join(', ')}.</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2>השאירו פרטים</h2>
+        <p class="muted">מתאים לעבודות מתוכננות. בתקלה דחופה עדיף להתקשר.</p>
+        <ContactForm id="contact" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .grid-c { display: grid; gap: var(--space-7); align-items: start; }
+  @media (min-width: 1000px) { .grid-c { grid-template-columns: 1fr 1.1fr; } }
+  .channels { display: grid; gap: 1rem; }
+  .ch {
+    display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.3rem; border-radius: var(--radius-l);
+    border: 1px solid var(--c-line); background: #fff; color: var(--c-ink); text-decoration: none; box-shadow: var(--shadow-1);
+    transition: transform 180ms var(--ease), box-shadow 180ms;
+  }
+  .ch:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
+  .ch-icon { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 16px; background: var(--c-mist); color: var(--c-ink); flex: none; }
+  .ch-call { background: var(--c-orange); border-color: var(--c-orange); }
+  .ch-call .ch-icon { background: var(--c-ink); color: var(--c-orange); }
+  .ch-wa .ch-icon { background: var(--c-whatsapp); color: #fff; }
+  .ch-text { display: grid; line-height: 1.35; }
+  .ch-text strong { font: 800 1.2rem var(--font-display); }
+  .big { font: 800 1.8rem var(--font-display); }
+  .info { padding: 1.4rem; border-radius: var(--radius-l); background: var(--c-mist); }
+  .info-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; margin-top: 0.5rem; }
+  .info-title :global(svg) { color: var(--c-orange-deep); }
+  dl { margin: 0 0 0.5rem; display: grid; gap: 0.3rem; }
+  dl div { display: flex; gap: 0.5rem; }
+  dt { font-weight: 700; }
+  dt::after { content: ':'; }
+  dd { margin: 0; }
+  .small { font-size: 0.9rem; }
+  .form-card { padding: clamp(1.25rem, 1rem + 1.5vw, 2rem); border-radius: var(--radius-l); border: 1px solid var(--c-line); box-shadow: var(--shadow-2); }
+  .form-card h2 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+</style>

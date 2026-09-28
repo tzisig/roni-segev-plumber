@@ -1,0 +1,119 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Icon from '../components/Icon.astro';
+import Triage from '../components/Triage.astro';
+import AreaMap from '../components/AreaMap.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { contact, images, telUrl, whatsappUrl } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'חירום 24/7' }];
+---
+<BaseLayout
+  title="אינסטלטור חירום 24/7 בחיפה והקריות"
+  description={`אינסטלטור חירום בחיפה והקריות 24 שעות ביממה, גם בשבת ובחג. פיצוץ צנרת, הצפה, סתימה: מה עושים עכשיו, והגעה תוך ${contact.arrival.min}-${contact.arrival.max} דקות.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <section class="em-hero on-dark">
+    <div class="container inner">
+      <div>
+        <Breadcrumbs crumbs={crumbs} dark />
+        <p class="eyebrow">חירום 24/7</p>
+        <h1>מים על הרצפה? <span>קודם סוגרים את הברז הראשי.</span></h1>
+        <p class="lead">אחר כך מתקשרים. {contact.responsePromise}, גם בשבת ובחג, והרכב יוצא אליכם מיד.</p>
+        <a class="giant" href={telUrl}>
+          <span class="ring" aria-hidden="true"><Icon name="phone" size={30} /></span>
+          <span><small>חירום, 24 שעות:</small><span class="ltr num">{contact.phone}</span></span>
+        </a>
+        <p class="wa-line">
+          <a class="btn btn--wa" href={whatsappUrl('חירום! יש לי תקלת אינסטלציה ואני צריך עזרה עכשיו')} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={20} /><span>או שלחו תמונה בוואטסאפ</span><span class="visually-hidden">(נפתח בחלון חדש)</span>
+          </a>
+        </p>
+      </div>
+      <div class="media">
+        <Image src={images.emergency} alt={images.emergencyAlt} widths={[480, 720, 960]} sizes="(min-width: 1000px) 480px, 100vw" loading="eager" fetchpriority="high" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section facts-section">
+    <div class="container">
+      <h2 class="visually-hidden">מה חשוב לדעת על שירות החירום</h2>
+      <ul class="facts">
+        <li><span class="icon-chip icon-chip--orange"><Icon name="clock" /></span><div><h3>באמת 24/7</h3><p>{contact.availabilityLabel}. לא מוקד, רוני עונה בעצמו.</p></div></li>
+        <li><span class="icon-chip icon-chip--orange"><Icon name="truck" /></span><div><h3>הגעה תוך {contact.arrival.min}-{contact.arrival.max} דקות</h3><p>בחיפה ובקריות. בשיחה תקבלו זמן הגעה משוער.</p></div></li>
+        <li><span class="icon-chip icon-chip--orange"><Icon name="moon" /></span><div><h3>מחיר לילה ושבת, מראש</h3><p>{contact.afterHoursNote}</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--dark" id="what-happened">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">עזרה ראשונה</p>
+        <h2>בחרו מה קרה, ובצעו את הצעדים</h2>
+        <p>ההנחיות האלה מצמצמות נזק עד שרוני מגיע. אם יש סכנה, בעיקר מים ליד חשמל, שמרו מרחק והתקשרו.</p>
+      </div>
+      <Triage id="em-triage" />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="narrow">
+      <div class="section-head">
+        <p class="eyebrow">שווה לדעת מראש</p>
+        <h2>איפה הברז הראשי שלכם?</h2>
+        <p>ברגע של פיצוץ אין זמן לחפש. כדאי לבדוק היום, כשהכול רגוע.</p>
+      </div>
+      <ul class="check-list">
+        <li><Icon name="check" size={20} />בבניין משותף, הברז הראשי של הדירה נמצא בדרך כלל ליד שעון המים, בארון בחדר המדרגות או בגומחה ליד הדלת.</li>
+        <li><Icon name="check" size={20} />בבית פרטי, חפשו ליד שעון המים בחזית הבית, בגינה או בגומחה בקיר החיצוני.</li>
+        <li><Icon name="check" size={20} />סגירה היא בכיוון השעון. ברז שלא זז בקלות, אל תכריחו אותו. תגידו לנו, ונחליף אותו בביקור הבא.</li>
+        <li><Icon name="check" size={20} />לדוד יש ברז כניסה נפרד. סגירה שלו עוצרת נזילה מהדוד בלי להשאיר את כל הבית בלי מים.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--dark blueprint">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">זמני הגעה</p>
+        <h2>כמה זמן ייקח לנו להגיע אליכם</h2>
+      </div>
+      <AreaMap />
+    </div>
+  </section>
+
+  <CtaBand title="לא בטוחים אם זה דחוף?" text="התקשרו ותתארו מה קורה. אם אפשר לחכות לבוקר, נגיד לכם, ונחסוך לכם את תוספת הלילה." whatsappText="שלום רוני, יש לי תקלה ואני לא בטוח אם היא דחופה" />
+</BaseLayout>
+
+<style>
+  .em-hero {
+    color: #fff; padding-block: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+    background: radial-gradient(900px 500px at 85% 0%, rgb(255 122 26 / 0.35), transparent 60%), var(--c-ink);
+  }
+  .inner { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 1000px) { .inner { grid-template-columns: 1.3fr 1fr; } }
+  h1 span { display: block; color: var(--c-orange); }
+  .lead { color: var(--c-on-dark-muted); max-width: 38rem; }
+  .giant {
+    display: inline-flex; align-items: center; gap: 1rem; margin-top: var(--space-3); padding: 0.9rem 1.4rem 0.9rem 1.8rem;
+    border-radius: 999px; background: var(--c-orange); color: var(--c-ink); text-decoration: none;
+    box-shadow: 0 18px 40px -16px rgb(255 122 26 / 0.8);
+  }
+  .giant small { display: block; font-weight: 700; font-size: 0.9rem; }
+  .giant .num { font: 800 clamp(1.8rem, 1.3rem + 2vw, 2.6rem)/1 var(--font-display); }
+  .ring { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 50%; background: var(--c-ink); color: var(--c-orange); flex: none; }
+  .wa-line { margin: var(--space-4) 0 0; }
+  .media { border-radius: var(--radius-l); overflow: hidden; border: 1px solid rgb(255 255 255 / 0.15); }
+  .media :global(img) { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .facts-section { padding-block: var(--space-7); }
+  .facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.25rem; }
+  @media (min-width: 900px) { .facts { grid-template-columns: repeat(3, 1fr); } }
+  .facts li { display: flex; gap: 0.9rem; }
+  .facts h3 { font-size: 1.15rem; margin-bottom: 0.3rem; }
+  .facts p { margin: 0; color: var(--c-muted); }
+</style>

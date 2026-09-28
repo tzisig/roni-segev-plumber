@@ -1,0 +1,30 @@
+---
+// Primary call + WhatsApp pair, used in heroes and CTA bands.
+import Icon from './Icon.astro';
+import { contact, telUrl, whatsappUrl } from '../config/site.config';
+
+interface Props { whatsappText?: string; size?: 'md' | 'lg'; note?: boolean }
+const { whatsappText, size = 'lg', note = true } = Astro.props;
+---
+<div class="call-buttons">
+  <div class="row">
+    <a class:list={['btn', { 'btn--lg': size === 'lg' }]} href={telUrl}>
+      <Icon name="phone" size={22} />
+      <span>התקשרו: <span class="ltr">{contact.phone}</span></span>
+    </a>
+    <a class:list={['btn btn--wa', { 'btn--lg': size === 'lg' }]} href={whatsappUrl(whatsappText)} target="_blank" rel="noopener">
+      <Icon name="whatsapp" size={22} />
+      <span>שלחו וואטסאפ</span>
+      <span class="visually-hidden">(נפתח בחלון חדש)</span>
+    </a>
+  </div>
+  {note && <p class="note"><span class="live-dot" aria-hidden="true"></span>{contact.responsePromise}</p>}
+</div>
+
+<style>
+  .call-buttons { margin-top: var(--space-5); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .row .btn { flex: 1 1 220px; }
+  @media (min-width: 560px) { .row .btn { flex: 0 0 auto; } }
+  .note { display: flex; align-items: center; gap: 0.55rem; margin: var(--space-4) 0 0; font-size: 0.95rem; opacity: 0.9; }
+</style>

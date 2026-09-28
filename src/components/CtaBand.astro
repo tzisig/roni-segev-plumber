@@ -1,0 +1,51 @@
+---
+// Closing call-to-action band: big phone number, used at the bottom of most pages.
+import Icon from './Icon.astro';
+import CallButtons from './CallButtons.astro';
+import { contact, telUrl } from '../config/site.config';
+
+interface Props { title?: string; text?: string; whatsappText?: string }
+const {
+  title = 'תקלה? אל תחכו שהיא תגדל.',
+  text = `${contact.availabilityLabel}. מחיר סגור לפני שמתחילים, ואחריות בכתב על כל עבודה.`,
+  whatsappText,
+} = Astro.props;
+---
+<section class="cta-band blueprint on-dark">
+  <div class="container inner">
+    <div>
+      <p class="eyebrow">מתקשרים, רוני עונה</p>
+      <h2>{title}</h2>
+      <p class="text">{text}</p>
+      <CallButtons whatsappText={whatsappText} note={false} />
+    </div>
+    <a class="big-phone" href={telUrl}>
+      <span class="ring" aria-hidden="true"><Icon name="phone" size={34} /></span>
+      <span class="ltr num">{contact.phone}</span>
+      <span class="small">עונים 24 שעות, 7 ימים</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .cta-band { color: #fff; padding-block: clamp(3rem, 2rem + 4vw, 5rem); }
+  .inner { display: grid; gap: var(--space-6); align-items: center; }
+  .text { color: var(--c-on-dark-muted); font-size: 1.1rem; max-width: 36rem; }
+  .big-phone {
+    display: grid; justify-items: center; gap: 0.5rem; padding: var(--space-6) var(--space-5);
+    border-radius: var(--radius-l); background: rgb(255 255 255 / 0.05); border: 1px dashed rgb(255 255 255 / 0.25);
+    color: #fff; text-decoration: none; text-align: center; transition: background-color 200ms;
+  }
+  .big-phone:hover { background: rgb(255 255 255 / 0.09); }
+  .ring { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: var(--c-orange); color: var(--c-ink); }
+  @media (prefers-reduced-motion: no-preference) {
+    .ring { animation: ring 3.2s ease-in-out infinite; }
+  }
+  @keyframes ring {
+    0%, 70%, 100% { transform: rotate(0); }
+    74% { transform: rotate(-12deg); } 78% { transform: rotate(10deg); } 82% { transform: rotate(-8deg); } 86% { transform: rotate(6deg); }
+  }
+  .num { font: 800 clamp(2rem, 1.4rem + 2.5vw, 3rem)/1 var(--font-display); letter-spacing: 0.02em; }
+  .small { color: var(--c-on-dark-muted); font-size: 0.95rem; }
+  @media (min-width: 900px) { .inner { grid-template-columns: 1.4fr 1fr; } }
+</style>

@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import ProcessSteps from '../../components/ProcessSteps.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { services, site } from '../../config/site.config';
+import { breadcrumbSchema, home } from '../../lib/schema';
+
+const crumbs = [home, { label: 'שירותים' }];
+const listSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: services.map((s, i) => ({ '@type': 'ListItem', position: i + 1, name: s.title, url: `${site.url}/services/${s.slug}/` })),
+};
+---
+<BaseLayout
+  title="שירותי אינסטלציה בחיפה והקריות"
+  description={`כל שירותי האינסטלציה של רוני שגב: פתיחת סתימות, איתור נזילות, דודי שמש, החלפת צנרת, צילום קווי ביוב, התקנות, מז"ח ושיפוצים. מחירי החל מ- שקופים.`}
+  schema={[breadcrumbSchema(crumbs), listSchema]}
+>
+  <PageHero
+    eyebrow="שירותים"
+    title="שירותי אינסטלציה לבית, לדירה ולעסק"
+    lead="מתקלה דחופה בשתיים בלילה ועד תכנון צנרת לשיפוץ. לכל שירות יש עמוד עם הסבר, תהליך העבודה ומחיר החל מ-."
+    crumbs={crumbs}
+  />
+  <section class="section">
+    <div class="container">
+      <h2 class="visually-hidden">רשימת השירותים</h2>
+      <div class="grid grid--3">
+        {services.map((s, i) => <div class="reveal" data-delay={String(i % 3)}><ServiceCard service={s} /></div>)}
+      </div>
+    </div>
+  </section>
+  <section class="section section--mist">
+    <div class="container">
+      <div class="section-head center">
+        <p class="eyebrow">בכל שירות</p>
+        <h2>אותו תהליך, אותה שקיפות</h2>
+      </div>
+      <ProcessSteps />
+    </div>
+  </section>
+  <CtaBand />
+</BaseLayout>

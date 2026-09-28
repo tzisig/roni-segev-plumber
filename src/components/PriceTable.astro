@@ -1,0 +1,41 @@
+---
+import { priceList, formatPrice } from '../config/site.config';
+interface Props { groups?: string[]; headingLevel?: 'h2' | 'h3' }
+const { groups, headingLevel = 'h3' } = Astro.props;
+const list = groups ? priceList.filter((g) => groups.includes(g.title)) : priceList;
+const H = headingLevel;
+---
+<div class="prices">
+  {list.map((g) => (
+    <section class="group">
+      <H class="g-title">{g.title}</H>
+      <table>
+        <caption class="visually-hidden">{g.title}: מחירי החל מ-, כולל מע"מ</caption>
+        <thead class="visually-hidden"><tr><th scope="col">עבודה</th><th scope="col">החל מ-</th></tr></thead>
+        <tbody>
+          {g.items.map((it) => (
+            <tr>
+              <th scope="row">{it.name}{it.note && <span class="note">{it.note}</span>}</th>
+              <td><span class="from">החל מ-</span><strong>{formatPrice(it.from)}</strong></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ))}
+</div>
+
+<style>
+  .prices { display: grid; gap: var(--space-5); }
+  @media (min-width: 900px) { .prices { grid-template-columns: 1fr 1fr; } }
+  .group { background: #fff; border: 1px solid var(--c-line); border-radius: var(--radius-l); padding: 1.25rem 1.4rem; box-shadow: var(--shadow-1); }
+  .g-title { font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.75rem; border-bottom: 3px solid var(--c-orange); margin-bottom: 0.25rem; }
+  table { width: 100%; border-collapse: collapse; }
+  tr + tr { border-top: 1px dashed var(--c-line); }
+  th, td { padding: 0.8rem 0; vertical-align: top; }
+  th { text-align: start; font-weight: 600; }
+  .note { display: block; font-weight: 400; font-size: 0.875rem; color: var(--c-muted); }
+  td { text-align: end; white-space: nowrap; padding-inline-start: 1rem; }
+  .from { display: block; font-size: 0.8rem; color: var(--c-muted); }
+  td strong { font: 800 1.15rem var(--font-display); color: var(--c-ink); }
+</style>

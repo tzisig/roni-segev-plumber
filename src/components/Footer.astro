@@ -1,0 +1,84 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { site, contact, services, areas, legalNav, legal, owner, telUrl, whatsappUrl } from '../config/site.config';
+
+const year = new Date().getFullYear();
+---
+<footer class="footer on-dark">
+  <div class="container">
+    <div class="cols">
+      <div class="brand">
+        <Logo dark />
+        <p>{site.tagline}. {owner.role.split(',')[0]} עם רישיון מס' {owner.licenseNo}, זמין 24/7 לכל תקלה.</p>
+        <p class="avail"><span class="live-dot" aria-hidden="true"></span>{contact.availabilityLabel}</p>
+      </div>
+
+      <nav aria-label="שירותים">
+        <h2 class="col-title">שירותים</h2>
+        <ul>{services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.navTitle}</a></li>)}</ul>
+      </nav>
+
+      <nav aria-label="אזורי שירות">
+        <h2 class="col-title">אזורי שירות</h2>
+        <ul>
+          {areas.map((a) => <li><a href={`/areas/${a.slug}/`}>אינסטלטור {a.nameIn}</a></li>)}
+          <li><a href="/emergency/">חירום 24/7</a></li>
+          <li><a href="/prices/">מחירון</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <h2 class="col-title">יצירת קשר</h2>
+        <ul class="contact">
+          <li><a href={telUrl}><Icon name="phone" size={18} /><span class="ltr">{contact.phone}</span></a></li>
+          <li><a href={whatsappUrl()} target="_blank" rel="noopener"><Icon name="whatsapp" size={18} />וואטסאפ<span class="visually-hidden"> (נפתח בחלון חדש)</span></a></li>
+          <li><a href={`mailto:${contact.email}`}><Icon name="mail" size={18} /><span class="ltr">{contact.email}</span></a></li>
+          <li><span><Icon name="pin" size={18} />{site.region}</span></li>
+        </ul>
+        <dl class="hours">
+          {contact.hours.map((h) => (<div><dt>{h.days}</dt><dd>{h.time}</dd></div>))}
+        </dl>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <p>© {year} {legal.businessName}. עוסק מורשה {legal.businessId}.</p>
+      <ul class="legal">
+        {legalNav.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        <li><a href="/faq/">שאלות נפוצות</a></li>
+        <li><button type="button" class="linklike" data-cookie-settings>הגדרות עוגיות</button></li>
+      </ul>
+    </div>
+    {site.isDemo && <p class="demo-note">{site.demoNote}</p>}
+  </div>
+</footer>
+
+<style>
+  .footer { background: #06182F; color: var(--c-on-dark-muted); padding-block: var(--space-8) var(--space-5); font-size: 0.975rem; }
+  .cols { display: grid; gap: var(--space-6); }
+  @media (min-width: 720px) { .cols { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .cols { grid-template-columns: 1.4fr 1fr 1fr 1.2fr; } }
+  .brand p { margin-top: var(--space-4); max-width: 28rem; }
+  .avail { display: flex; align-items: center; gap: 0.55rem; color: #fff; font-weight: 600; }
+  .col-title { font-size: 1rem; color: #fff; margin-bottom: var(--space-4); }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.55rem; }
+  a { color: var(--c-on-dark-muted); text-decoration: none; }
+  a:hover { color: #fff; text-decoration: underline; }
+  .contact a, .contact span { display: inline-flex; align-items: center; gap: 0.55rem; }
+  .contact :global(svg) { color: var(--c-orange); flex: none; }
+  .hours { margin: var(--space-5) 0 0; display: grid; gap: 0.3rem; }
+  .hours div { display: flex; gap: 0.5rem; }
+  .hours dt { color: #fff; font-weight: 600; }
+  .hours dt::after { content: ':'; }
+  .hours dd { margin: 0; }
+  .bottom {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3);
+    margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid rgb(255 255 255 / 0.1); font-size: 0.9rem;
+  }
+  .bottom p { margin: 0; }
+  .legal { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+  .linklike { background: none; border: 0; padding: 0; font: inherit; color: var(--c-on-dark-muted); cursor: pointer; }
+  .linklike:hover { color: #fff; text-decoration: underline; }
+  .demo-note { margin: var(--space-4) 0 0; font-size: 0.85rem; color: var(--c-orange); }
+</style>

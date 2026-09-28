@@ -1,0 +1,103 @@
+---
+// Schematic route map of the service area: routes from the base to each city, with arrival times.
+// The SVG is decorative; the list next to it carries the same information and the links.
+import Icon from './Icon.astro';
+import { areas, contact } from '../config/site.config';
+
+interface Props { current?: string; headingLevel?: 'h2' | 'h3' }
+const { current, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const b = contact.baseMap;
+const route = (x: number, y: number) => {
+  const mx = (b.x + x) / 2;
+  const my = (b.y + y) / 2 - 6;
+  return `M${b.x},${b.y} Q${mx},${my} ${x},${y}`;
+};
+---
+<div class="area-map">
+  <svg viewBox="0 0 100 70" class="map" aria-hidden="true" focusable="false">
+    <defs>
+      <pattern id="sea-lines" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
+        <line x1="0" y1="0" x2="0" y2="3" stroke="rgb(124 195 255 / 0.25)" stroke-width="0.4" />
+      </pattern>
+    </defs>
+    <rect width="100" height="70" fill="var(--c-ink2)" rx="3" />
+    <!-- Sea and Haifa bay (west on the left) -->
+    <path class="sea" d="M0,0 L41,0 C39,12 41,24 44,32 C46,40 44,47 37,49 C29,51 22,47 15,50 C9,53 4,57 0,57 Z" />
+    <path d="M0,0 L41,0 C39,12 41,24 44,32 C46,40 44,47 37,49 C29,51 22,47 15,50 C9,53 4,57 0,57 Z" fill="url(#sea-lines)" />
+    <text x="14" y="16" class="sea-label">הים התיכון</text>
+    <text x="24" y="37" class="sea-label small">מפרץ חיפה</text>
+    <!-- Carmel ridge -->
+    <path d="M6,64 C16,58 28,56 40,60 C48,63 56,66 64,70" class="ridge" />
+    <text x="52" y="66.5" class="sea-label small">רכס הכרמל</text>
+
+    {areas.map((a, i) => (
+      <path d={route(a.map.x, a.map.y)} class="route" style={`--d:${i * 0.25}s`} />
+    ))}
+
+    <g class="base">
+      <circle cx={b.x} cy={b.y} r="3.2" class="base-ring" />
+      <circle cx={b.x} cy={b.y} r="1.8" fill="var(--c-orange)" />
+      <text x={b.x - 4} y={b.y + 0.9} text-anchor="start" direction="rtl" class="base-label">הבסיס: {contact.baseArea}</text>
+    </g>
+
+    {areas.map((a) => (
+      <g class:list={['node', { current: a.slug === current }]}>
+        <circle cx={a.map.x} cy={a.map.y} r="2.2" />
+        <text x={a.map.x} y={a.map.y - 3.6} text-anchor="middle" direction="rtl" class="node-name">{a.name}</text>
+        <text x={a.map.x} y={a.map.y + 5.6} text-anchor="middle" direction="rtl" class="node-eta">{a.eta.min}-{a.eta.max} דק'</text>
+      </g>
+    ))}
+  </svg>
+
+  <div class="list">
+    <H class="list-title">זמני הגעה משוערים</H>
+    <ul>
+      {areas.map((a) => (
+        <li class:list={{ current: a.slug === current }}>
+          <a href={`/areas/${a.slug}/`} aria-current={a.slug === current ? 'page' : undefined}>
+            <Icon name="pin" size={20} />
+            <span class="n">{a.name}</span>
+            <span class="eta"><Icon name="truck" size={16} /> {a.eta.min}-{a.eta.max} דקות</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="note">זמני ההגעה משתנים לפי שעה ועומס תנועה. בשיחה תקבלו זמן מדויק.</p>
+  </div>
+</div>
+
+<style>
+  .area-map { display: grid; gap: var(--space-5); align-items: center; }
+  @media (min-width: 960px) { .area-map { grid-template-columns: 1.35fr 1fr; } }
+  .map { width: 100%; height: auto; border-radius: var(--radius-l); box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.5); direction: ltr; }
+  .sea { fill: #0C3A6B; }
+  .sea-label { fill: rgb(185 200 221 / 0.7); font: 600 2.6px var(--font-display); }
+  .sea-label.small { font-size: 2.1px; }
+  .ridge { fill: none; stroke: rgb(255 255 255 / 0.18); stroke-width: 0.6; stroke-dasharray: 1 1; }
+  .route { fill: none; stroke: var(--c-orange); stroke-width: 0.7; stroke-dasharray: 1.6 1.2; opacity: 0.85; }
+  @media (prefers-reduced-motion: no-preference) {
+    .route { animation: flow 2.4s linear infinite; animation-delay: var(--d); }
+  }
+  @keyframes flow { to { stroke-dashoffset: -5.6; } }
+  .base-ring { fill: rgb(255 122 26 / 0.25); }
+  .base-label { fill: #fff; font: 700 2.5px var(--font-display); }
+  .node circle { fill: #fff; stroke: var(--c-ink2); stroke-width: 0.6; }
+  .node.current circle { fill: var(--c-orange); }
+  .node-name { fill: #fff; font: 700 3.1px var(--font-display); paint-order: stroke; stroke: var(--c-ink2); stroke-width: 0.8px; }
+  .node-eta { fill: var(--c-orange); font: 700 2.5px var(--font-display); paint-order: stroke; stroke: var(--c-ink2); stroke-width: 0.8px; }
+
+  .list-title { font-size: 1.25rem; }
+  .list ul { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.5rem; }
+  .list a {
+    display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem 1rem; border-radius: 12px;
+    background: rgb(255 255 255 / 0.06); border: 1px solid rgb(255 255 255 / 0.12);
+    color: #fff; text-decoration: none; transition: background-color 180ms, border-color 180ms;
+  }
+  .list a:hover { background: rgb(255 255 255 / 0.12); }
+  .list .current a { border-color: var(--c-orange); }
+  .list a :global(svg) { color: var(--c-orange); flex: none; }
+  .n { font: 700 1.05rem var(--font-display); }
+  .eta { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: var(--c-on-dark-muted); }
+  .note { font-size: 0.9rem; color: var(--c-on-dark-muted); margin: 0; }
+</style>

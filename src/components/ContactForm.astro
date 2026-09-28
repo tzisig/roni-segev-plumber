@@ -1,0 +1,164 @@
+---
+import Icon from './Icon.astro';
+import { form, contact } from '../config/site.config';
+
+interface Props {
+  /** Pre-selected topic, e.g. from a service page. */
+  topic?: string;
+  /** Unique id prefix when more than one form is on a page. */
+  id?: string;
+  compact?: boolean;
+}
+const { topic = '', id = 'lead', compact = false } = Astro.props;
+---
+<form
+  class:list={['lead-form', { compact }]}
+  novalidate
+  data-lead-form
+  data-destinations={JSON.stringify(form.destinations)}
+  data-thanks={form.thankYouPath}
+>
+  <div class="grid">
+    <div class="field">
+      <label for={`${id}-name`}>שם מלא</label>
+      <input id={`${id}-name`} name="name" type="text" autocomplete="name" required aria-describedby={`${id}-name-err`} />
+      <p class="field-error" id={`${id}-name-err`} aria-live="polite"></p>
+    </div>
+    <div class="field">
+      <label for={`${id}-phone`}>טלפון</label>
+      <input id={`${id}-phone`} name="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required aria-describedby={`${id}-phone-err`} />
+      <p class="field-error" id={`${id}-phone-err`} aria-live="polite"></p>
+    </div>
+    <div class="field wide">
+      <label for={`${id}-topic`}>סוג התקלה או העבודה</label>
+      <select id={`${id}-topic`} name="topic">
+        {form.topics.map((t) => <option value={t} selected={t === topic}>{t}</option>)}
+      </select>
+    </div>
+    {!compact && (
+      <div class="field wide">
+        <label for={`${id}-msg`}>מה קרה? <span class="hint">(לא חובה)</span></label>
+        <textarea id={`${id}-msg`} name="message" rows="3"></textarea>
+      </div>
+    )}
+  </div>
+
+  <!-- Honeypot: hidden from people, bots fill it -->
+  <div class="hp" aria-hidden="true">
+    <label>אל תמלאו שדה זה <input type="text" name="company_site" tabindex="-1" autocomplete="off" /></label>
+  </div>
+  <input type="hidden" name="source_page" />
+  <input type="hidden" name="utm" />
+
+  <button class="btn btn--block submit" type="submit">
+    <span class="label">{form.submitLabel}</span>
+    <Icon name="arrow" size={18} />
+  </button>
+
+  <p class="note"><Icon name="lock" size={14} /> {form.privacyNote} {contact.responsePromise}.</p>
+  <p class="form-status" role="alert" data-status hidden>
+    השליחה לא הצליחה. בתקלה דחופה עדיף להתקשר ישירות: <a href={`tel:${contact.phoneHref}`} dir="ltr">{contact.phone}</a>
+  </p>
+</form>
+
+<style>
+  .lead-form { display: grid; gap: var(--space-4); }
+  .grid { display: grid; gap: var(--space-3) var(--space-4); }
+  @media (min-width: 560px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .wide { grid-column: 1 / -1; }
+  }
+  .compact .grid { grid-template-columns: 1fr; }
+  /* No off-screen offset: in RTL a negative left offset creates horizontal scroll */
+  .hp { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none; }
+  .lead-form { position: relative; }
+  .submit { margin-top: var(--space-2); }
+  .submit[disabled] { opacity: 0.7; cursor: progress; }
+  .note { display: flex; gap: 0.4rem; align-items: flex-start; font-size: 0.8125rem; color: var(--c-muted); margin: 0; }
+  .note :global(svg) { margin-top: 0.25rem; flex: none; color: var(--c-orange-deep); }
+  .form-status { color: var(--c-error); font-size: 0.9375rem; margin: 0; }
+  .form-status a { color: inherit; font-weight: 600; }
+</style>
+
+<script>
+  import { track } from '../scripts/site';
+
+  type Destination = { type: 'web3forms'; accessKey: string } | { type: 'webhook'; url: string };
+
+  const send = async (d: Destination, data: Record<string, FormDataEntryValue>) => {
+    const isEmail = d.type === 'web3forms';
+    const res = await fetch(isEmail ? 'https://api.web3forms.com/submit' : d.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(isEmail ? { access_key: d.accessKey, subject: `פנייה חדשה: ${data.topic}`, ...data } : data),
+    });
+    if (!res.ok) throw new Error(`${d.type} ${res.status}`);
+  };
+
+  const PHONE_RE = /^(?:\+?972|0)(?:[23489]|5\d|7\d)\d{7}$/;
+
+  document.querySelectorAll<HTMLFormElement>('[data-lead-form]').forEach((formEl) => {
+    const params = new URLSearchParams(location.search);
+    const utm = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']
+      .filter((k) => params.get(k)).map((k) => `${k}=${params.get(k)}`).join('&');
+    (formEl.elements.namedItem('source_page') as HTMLInputElement).value = location.pathname;
+    (formEl.elements.namedItem('utm') as HTMLInputElement).value = utm || document.referrer || 'direct';
+
+    const setError = (input: HTMLInputElement, msg: string) => {
+      input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      const err = document.getElementById(input.getAttribute('aria-describedby') || '');
+      if (err) err.textContent = msg;
+    };
+
+    const validate = () => {
+      const name = formEl.elements.namedItem('name') as HTMLInputElement;
+      const phone = formEl.elements.namedItem('phone') as HTMLInputElement;
+      let ok = true;
+      if (name.value.trim().length < 2) { setError(name, 'נא למלא שם'); ok = false; } else setError(name, '');
+      const digits = phone.value.replace(/[\s\-()]/g, '');
+      if (!PHONE_RE.test(digits)) { setError(phone, 'נא למלא מספר טלפון תקין'); ok = false; } else setError(phone, '');
+      if (!ok) formEl.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      return ok;
+    };
+
+    formEl.querySelectorAll('input[required]').forEach((i) =>
+      i.addEventListener('blur', () => { if ((i as HTMLInputElement).value) validate(); }));
+
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = formEl.querySelector<HTMLElement>('[data-status]')!;
+      status.hidden = true;
+      if ((formEl.elements.namedItem('company_site') as HTMLInputElement).value) return; // bot
+      if (!validate()) return;
+
+      const btn = formEl.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      const label = btn.querySelector('.label')!;
+      const original = label.textContent;
+      btn.disabled = true;
+      label.textContent = 'שולח...';
+
+      const data = Object.fromEntries(new FormData(formEl).entries());
+      const destinations: Destination[] = JSON.parse(formEl.dataset.destinations || '[]');
+      const thanks = formEl.dataset.thanks;
+
+      try {
+        // Every destination gets the lead. Success if at least one accepted it (demo mode: none configured).
+        if (destinations.length) {
+          const results = await Promise.allSettled(destinations.map((d) => send(d, data)));
+          const failed = results.filter((r) => r.status === 'rejected');
+          failed.forEach((r) => console.error('Lead destination failed', (r as PromiseRejectedResult).reason));
+          if (failed.length) track('form_destination_error', { failed: failed.length, total: destinations.length });
+          if (failed.length === destinations.length) throw new Error('All lead destinations failed');
+        }
+        track('generate_lead', { form_topic: data.topic, page: location.pathname });
+        location.href = thanks || '/thank-you/';
+      } catch (err) {
+        console.error('Lead form failed', err);
+        track('form_error', { page: location.pathname });
+        status.hidden = false;
+        btn.disabled = false;
+        label.textContent = original;
+      }
+    });
+  });
+</script>

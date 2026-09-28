@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { faqs, services } from '../config/site.config';
+import { breadcrumbSchema, faqSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'שאלות נפוצות' }];
+---
+<BaseLayout
+  title="שאלות נפוצות על אינסטלציה, מחירים וזמינות"
+  description="תשובות לשאלות הנפוצות: זמינות 24/7, זמני הגעה בחיפה והקריות, איך נקבע המחיר, אחריות, תשלום, ביטוח ומה לעשות עד שהאינסטלטור מגיע."
+  schema={[breadcrumbSchema(crumbs), faqSchema(faqs)]}
+>
+  <PageHero
+    eyebrow="שאלות נפוצות"
+    title="כל מה ששואלים אותנו לפני שמזמינים"
+    lead="לא מצאתם תשובה? מתקשרים או שולחים וואטסאפ, ורוני עונה בעצמו."
+    crumbs={crumbs}
+  />
+  <section class="section">
+    <div class="narrow">
+      <h2>שאלות כלליות</h2>
+      <FaqList items={faqs} />
+
+      <h2 class="spaced">שאלות לפי שירות</h2>
+      <p class="muted">בכל עמוד שירות יש שאלות ותשובות שמתאימות לו:</p>
+      <ul class="svc">
+        {services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.title}</a></li>)}
+      </ul>
+    </div>
+  </section>
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); }
+  .spaced { margin-top: var(--space-7); }
+  .svc { columns: 2 16rem; padding-inline-start: 1.2rem; }
+  .svc li { margin-bottom: 0.4rem; }
+</style>

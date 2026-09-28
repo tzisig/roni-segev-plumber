@@ -1,0 +1,336 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import Stars from '../components/Stars.astro';
+import CallButtons from '../components/CallButtons.astro';
+import TrustBar from '../components/TrustBar.astro';
+import Triage from '../components/Triage.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import StatsRow from '../components/StatsRow.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
+import AreaMap from '../components/AreaMap.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import {
+  site, hero, images, owner, contact, stats, services, whyUs, gallery, testimonials, faqs, priceList, formatPrice,
+} from '../config/site.config';
+
+const featuredWork = gallery.slice(0, 3);
+const featuredReviews = testimonials.slice(0, 3);
+const priceHighlights = priceList.flatMap((g) => g.items).filter((i) => !i.name.startsWith('תוספת')).slice(0, 6);
+---
+<BaseLayout
+  title={`אינסטלטור בחיפה והקריות 24/7 | ${site.shortName}`}
+  description={`אינסטלטור מוסמך בחיפה והקריות, זמין 24/7: פתיחת סתימות, איתור נזילות, דודים, החלפת צנרת ושיפוצים. מגיע תוך ${contact.arrival.min}-${contact.arrival.max} דקות, מחיר סגור מראש.`}
+>
+  <!-- ============ HERO ============ -->
+  <section class="hero blueprint on-dark">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">{hero.eyebrow}</p>
+        <h1>{hero.title} <span class="accent">{hero.titleAccent}</span></h1>
+        <p class="lead">{hero.lead}</p>
+        <CallButtons whatsappText="שלום רוני, יש לי תקלה ואשמח לעזרה" />
+        <a class="rating" href="/reviews/">
+          <Stars rating={stats.rating} />
+          <span><strong>{stats.rating}</strong> מתוך 5, {stats.reviewCount} ביקורות{stats.reviewSource && ` ב-${stats.reviewSource}`}</span>
+        </a>
+      </div>
+
+      <div class="hero-media">
+        <div class="photo">
+          <Image src={images.hero} alt={images.heroAlt} widths={[480, 720, 960, 1200]} sizes="(min-width: 1000px) 520px, 100vw" loading="eager" fetchpriority="high" />
+        </div>
+        <!-- Live status card: the clock runs on the visitor's device, availability comes from the config -->
+        <div class="status-card" aria-label="זמינות עכשיו">
+          <div class="sc-row sc-head">
+            <span class="live-dot" aria-hidden="true"></span>
+            <strong data-status-title>רוני זמין עכשיו</strong>
+            <span class="sc-time ltr" data-clock></span>
+          </div>
+          <div class="sc-row"><Icon name="truck" size={18} /><span>הגעה תוך <strong>{contact.arrival.min}-{contact.arrival.max} דק'</strong></span></div>
+          <div class="sc-row"><Icon name="tag" size={18} /><span>מחיר סגור <strong>לפני שמתחילים</strong></span></div>
+          <div class="sc-row"><Icon name="shield" size={18} /><span>אחריות <strong>בכתב</strong></span></div>
+        </div>
+        <div class="license-badge">
+          <Icon name="badge" size={26} />
+          <span>אינסטלטור מוסמך<br /><strong>רישיון {owner.licenseNo}</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="trust-wrap">
+    <div class="container"><div class="trust-card"><TrustBar /></div></div>
+  </div>
+
+  <!-- ============ TRIAGE ============ -->
+  <section class="section section--dark triage-section" id="what-happened">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">עזרה ראשונה לבית</p>
+        <h2>מה קרה? בחרו, ותדעו מה לעשות בדקות הקרובות</h2>
+        <p>ההחלטות בחמש הדקות הראשונות קובעות כמה נזק ייגרם. בחרו את התקלה, בצעו את הצעדים, ורוני כבר בדרך.</p>
+      </div>
+      <Triage id="home-triage" />
+    </div>
+  </section>
+
+  <!-- ============ SERVICES ============ -->
+  <section class="section" id="services">
+    <div class="container">
+      <div class="head-row">
+        <div class="section-head">
+          <p class="eyebrow">שירותים</p>
+          <h2>מתקלה דחופה באמצע הלילה ועד שיפוץ חדר רחצה</h2>
+          <p>כל עבודות האינסטלציה בבית, בדירה ובעסק. אותו אינסטלטור, אותה אחריות.</p>
+        </div>
+        <a class="link-arrow" href="/services/">לכל השירותים<Icon name="arrow" size={18} /></a>
+      </div>
+      <div class="grid grid--4">
+        {services.map((s, i) => <div class="reveal" data-delay={String(i % 4)}><ServiceCard service={s} /></div>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHY THE OWNER ============ -->
+  <section class="section section--mist">
+    <div class="container why-grid">
+      <div class="why-portrait reveal">
+        <div class="portrait">
+          <Image src={owner.image} alt={owner.imageAlt} widths={[400, 640, 800]} sizes="(min-width: 1000px) 420px, 100vw" />
+        </div>
+        <div class="sign">
+          <strong>{owner.name}</strong>
+          <span>{owner.role}</span>
+        </div>
+      </div>
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">למה רוני</p>
+          <h2>מי שעונה לטלפון הוא מי שמגיע אליכם הביתה</h2>
+          <p>{owner.shortBio}</p>
+        </div>
+        <ul class="why-list">
+          {whyUs.map((w, i) => (
+            <li class="reveal" data-delay={String(i % 3)}>
+              <span class="icon-chip"><Icon name={w.icon} /></span>
+              <div><h3>{w.title}</h3><p>{w.text}</p></div>
+            </li>
+          ))}
+        </ul>
+        <a class="link-arrow" href="/about/">עוד על רוני<Icon name="arrow" size={18} /></a>
+      </div>
+    </div>
+    <div class="container stats-wrap"><StatsRow /></div>
+  </section>
+
+  <!-- ============ PROCESS ============ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head center">
+        <p class="eyebrow">איך זה עובד</p>
+        <h2>ארבעה צעדים, בלי הפתעות</h2>
+      </div>
+      <ProcessSteps />
+    </div>
+  </section>
+
+  <!-- ============ BEFORE / AFTER ============ -->
+  <section class="section section--mist">
+    <div class="container">
+      <div class="head-row">
+        <div class="section-head">
+          <p class="eyebrow">לפני ואחרי</p>
+          <h2>גררו את הידית וראו את ההבדל</h2>
+          <p>כמה מהעבודות האחרונות שלנו בחיפה ובקריות.</p>
+        </div>
+        <a class="link-arrow" href="/gallery/">לכל העבודות<Icon name="arrow" size={18} /></a>
+      </div>
+      <div class="grid grid--3">
+        {featuredWork.map((g, i) => (
+          <article class="work reveal" data-delay={String(i)}>
+            <BeforeAfter before={g.before} after={g.after} beforeAlt={g.beforeAlt} afterAlt={g.afterAlt} label={`השוואת לפני ואחרי: ${g.title}`} sizes="(min-width: 1000px) 380px, 100vw" />
+            <h3>{g.title}</h3>
+            <p class="muted">{g.location} · {g.duration}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REVIEWS ============ -->
+  <section class="section">
+    <div class="container">
+      <div class="reviews-head">
+        <div class="section-head">
+          <p class="eyebrow">המלצות</p>
+          <h2>מה אומרים השכנים שלכם</h2>
+        </div>
+        <div class="score">
+          <span class="big">{stats.rating}</span>
+          <div>
+            <Stars rating={stats.rating} size={22} />
+            <p>{stats.reviewCount} ביקורות{stats.reviewSource && ` ב-${stats.reviewSource}`}</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid--3">
+        {featuredReviews.map((t, i) => <div class="reveal" data-delay={String(i)}><TestimonialCard t={t} /></div>)}
+      </div>
+      <p class="center-link"><a class="btn btn--ghost" href="/reviews/">לכל ההמלצות</a></p>
+    </div>
+  </section>
+
+  <!-- ============ AREAS ============ -->
+  <section class="section section--dark blueprint" id="areas">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">אזורי שירות</p>
+        <h2>חיפה והקריות, מהבסיס ב{contact.baseArea}</h2>
+        <p>הרכב יוצא מאמצע המפרץ, כך שרוב הכתובות נמצאות במרחק נסיעה קצר.</p>
+      </div>
+      <AreaMap />
+    </div>
+  </section>
+
+  <!-- ============ PRICES ============ -->
+  <section class="section">
+    <div class="container price-grid">
+      <div class="section-head">
+        <p class="eyebrow">מחירים שקופים</p>
+        <h2>יודעים כמה זה יעלה לפני שמתחילים</h2>
+        <p>המחירים כוללים מע"מ. אחרי האבחון מקבלים מחיר סגור, ורק אחרי אישור שלכם מתחילים לעבוד.</p>
+        <a class="btn btn--dark" href="/prices/">למחירון המלא</a>
+      </div>
+      <ul class="price-chips">
+        {priceHighlights.map((p) => (
+          <li><span>{p.name}</span><strong><small>החל מ-</small>{formatPrice(p.from)}</strong></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section section--mist">
+    <div class="narrow">
+      <div class="section-head center">
+        <p class="eyebrow">שאלות נפוצות</p>
+        <h2>לפני שמתקשרים</h2>
+      </div>
+      <FaqList items={faqs.slice(0, 5)} />
+      <p class="center-link"><a class="link-arrow" href="/faq/">לכל השאלות<Icon name="arrow" size={18} /></a></p>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero { color: #fff; padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) clamp(7rem, 6rem + 2vw, 7.5rem); position: relative; overflow: hidden; }
+  .hero::before {
+    content: ''; position: absolute; width: 620px; height: 620px; inset-inline-start: -200px; top: -260px;
+    background: radial-gradient(closest-side, rgb(21 87 176 / 0.55), transparent); pointer-events: none;
+  }
+  .hero-grid { display: grid; gap: clamp(2.5rem, 2rem + 3vw, 4rem); align-items: center; position: relative; }
+  @media (min-width: 1000px) { .hero-grid { grid-template-columns: 1.15fr 1fr; } }
+  h1 { max-width: 15ch; }
+  .accent { display: block; color: var(--c-orange); }
+  .hero .lead { color: var(--c-on-dark-muted); max-width: 36rem; }
+  .rating { display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.25rem; color: #fff; text-decoration: none; font-size: 0.95rem; }
+  .rating:hover span { text-decoration: underline; }
+
+  .hero-media { position: relative; max-width: 560px; margin-inline: auto; width: 100%; }
+  .photo { border-radius: 28px; overflow: hidden; border: 1px solid rgb(255 255 255 / 0.14); box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.7); }
+  .photo :global(img) { width: 100%; aspect-ratio: 4 / 4.2; object-fit: cover; }
+  .status-card {
+    position: absolute; inset-inline-end: -0.5rem; bottom: -2.5rem; width: min(290px, 80%);
+    background: #fff; color: var(--c-ink); border-radius: 18px; padding: 1rem 1.1rem;
+    box-shadow: 0 24px 50px -20px rgb(0 0 0 / 0.55); display: grid; gap: 0.55rem; font-size: 0.95rem;
+  }
+  .sc-row { display: flex; align-items: center; gap: 0.55rem; }
+  .sc-row :global(svg) { color: var(--c-blue); flex: none; }
+  .sc-head { padding-bottom: 0.55rem; border-bottom: 1px solid var(--c-line); font-family: var(--font-display); }
+  .sc-time { margin-inline-start: auto; font-weight: 700; color: var(--c-muted); font-variant-numeric: tabular-nums; }
+  .license-badge {
+    position: absolute; inset-inline-start: -0.5rem; top: 1.5rem; display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.7rem 1rem; border-radius: 14px; background: var(--c-orange); color: var(--c-ink);
+    font-size: 0.85rem; line-height: 1.25; box-shadow: 0 16px 30px -14px rgb(0 0 0 / 0.6);
+  }
+  @media (min-width: 1000px) {
+    .status-card { inset-inline-end: -2.5rem; }
+    .license-badge { inset-inline-start: -2rem; }
+  }
+
+  .trust-wrap { position: relative; z-index: 2; margin-top: -3rem; }
+  .trust-card { background: #fff; border-radius: var(--radius-l); padding: 1.4rem 1.5rem; box-shadow: var(--shadow-2); border: 1px solid var(--c-line); }
+
+  .triage-section { background: var(--c-ink2); margin-top: clamp(3rem, 2rem + 3vw, 5rem); }
+
+  .head-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem); }
+  .head-row .section-head { margin-bottom: 0; }
+
+  /* ---------- Why ---------- */
+  .why-grid { display: grid; gap: var(--space-7); align-items: start; }
+  @media (min-width: 1000px) { .why-grid { grid-template-columns: 0.8fr 1.2fr; } }
+  .why-portrait { position: relative; max-width: 440px; margin-inline: auto; width: 100%; }
+  @media (min-width: 1000px) { .why-portrait { position: sticky; top: calc(var(--top-offset) + 1.5rem); } }
+  .portrait { border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-2); }
+  .portrait :global(img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 30%; }
+  .sign {
+    position: absolute; inset-inline-start: 1rem; bottom: 1rem; display: grid; padding: 0.7rem 1rem; border-radius: 14px;
+    background: rgb(10 34 64 / 0.88); color: #fff; backdrop-filter: blur(6px); line-height: 1.3;
+  }
+  .sign strong { font: 800 1.2rem var(--font-display); }
+  .sign span { font-size: 0.85rem; color: var(--c-on-dark-muted); }
+  .why-list { list-style: none; padding: 0; margin: 0 0 var(--space-5); display: grid; gap: 1.25rem; }
+  @media (min-width: 640px) { .why-list { grid-template-columns: 1fr 1fr; } }
+  .why-list li { display: flex; gap: 0.9rem; align-items: flex-start; }
+  .why-list h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+  .why-list p { margin: 0; color: var(--c-muted); font-size: 0.98rem; }
+  .stats-wrap { margin-top: var(--space-7); }
+
+  /* ---------- Work ---------- */
+  .work h3 { font-size: 1.15rem; margin: 1rem 0 0.25rem; }
+  .work p { margin: 0; font-size: 0.95rem; }
+
+  /* ---------- Reviews ---------- */
+  .reviews-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem); }
+  .reviews-head .section-head { margin: 0; }
+  .score { display: flex; align-items: center; gap: 0.9rem; background: var(--c-mist); padding: 0.9rem 1.2rem; border-radius: var(--radius); }
+  .score .big { font: 800 3rem/1 var(--font-display); }
+  .score p { margin: 0.2rem 0 0; font-size: 0.9rem; color: var(--c-muted); }
+  .center-link { text-align: center; margin: var(--space-6) 0 0; }
+
+  /* ---------- Prices ---------- */
+  .price-grid { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 1000px) { .price-grid { grid-template-columns: 1fr 1.2fr; } }
+  .price-chips { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+  @media (min-width: 640px) { .price-chips { grid-template-columns: 1fr 1fr; } }
+  .price-chips li {
+    display: flex; flex-direction: column; gap: 0.3rem; padding: 1rem 1.2rem; border-radius: var(--radius);
+    border: 1px solid var(--c-line); background: linear-gradient(to left, var(--c-orange-soft), #fff 60%);
+  }
+  .price-chips span { font-weight: 600; }
+  .price-chips strong { font: 800 1.45rem var(--font-display); }
+  .price-chips small { font: 400 0.85rem var(--font-body); color: var(--c-muted); margin-inline-end: 0.3rem; }
+</style>
+
+<script>
+  // Status card clock: shows Israel time and switches the title at night
+  const clock = document.querySelector<HTMLElement>('[data-clock]');
+  const title = document.querySelector<HTMLElement>('[data-status-title]');
+  const tick = () => {
+    const now = new Date();
+    const time = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+    const hour = Number(now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Asia/Jerusalem' }));
+    if (clock) clock.textContent = time;
+    if (title) title.textContent = hour >= 22 || hour < 6 ? 'משמרת לילה: רוני זמין' : 'רוני זמין עכשיו';
+  };
+  tick();
+  setInterval(tick, 30_000);
+</script>

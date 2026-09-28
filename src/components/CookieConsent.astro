@@ -1,0 +1,32 @@
+---
+// Minimal consent banner. Analytics (GA4) loads only after the visitor accepts.
+interface Props { ga4?: string }
+const { ga4 = '' } = Astro.props;
+---
+<div class="consent" role="region" aria-label="הסכמה לעוגיות" hidden data-consent data-ga4={ga4}>
+  <p>
+    האתר משתמש בעוגיות חיוניות, ובהסכמתכם גם בעוגיות מדידה לשיפור השירות.
+    <a href="/privacy/">מדיניות פרטיות</a>
+  </p>
+  <div class="buttons">
+    <button type="button" class="btn" data-consent-accept>מאשר</button>
+    <button type="button" class="btn btn--ghost" data-consent-reject>רק חיוניות</button>
+  </div>
+</div>
+
+<style>
+  .consent {
+    position: fixed; z-index: 95; inset-inline: 0.75rem; bottom: calc(var(--mobile-bar) + 12px + env(safe-area-inset-bottom));
+    max-width: 30rem; padding: var(--space-5); border-radius: var(--radius);
+    background: var(--c-ink); color: #fff; border-top: 3px solid var(--c-orange);
+    box-shadow: 0 20px 50px -15px rgb(0 0 0 / 0.5); font-size: 0.95rem;
+  }
+  .consent p { margin-bottom: var(--space-4); }
+  .consent a { color: var(--c-orange); }
+  .buttons { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .buttons .btn { min-height: 44px; padding: 0.5rem 1.2rem; font-size: 0.95rem; }
+  .buttons .btn--ghost { color: #fff; border-color: rgb(255 255 255 / 0.4); }
+  @media (min-width: 900px) {
+    .consent { bottom: 1.5rem; inset-inline-start: auto; inset-inline-end: 1.5rem; }
+  }
+</style>

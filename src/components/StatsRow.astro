@@ -1,0 +1,29 @@
+---
+import { statItems } from '../config/site.config';
+interface Props { dark?: boolean }
+const { dark = false } = Astro.props;
+---
+<dl class:list={['stats', { dark }]}>
+  {statItems.map((s) => (
+    <div class="stat">
+      <dt>{s.label}</dt>
+      <dd>
+        {s.count !== undefined
+          ? <span class="ltr"><span data-count={s.count}>{s.count.toLocaleString('he-IL')}</span>{s.suffix}</span>
+          : <span class="ltr">{s.display}</span>}
+      </dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin: 0; background: var(--c-line); border: 1px solid var(--c-line); border-radius: var(--radius-l); overflow: hidden; }
+  @media (min-width: 900px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+  .stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.35rem; padding: 1.5rem 1.25rem; background: #fff; }
+  dt { color: var(--c-muted); font-size: 0.95rem; }
+  dd { margin: 0; font: 800 clamp(2rem, 1.5rem + 2vw, 2.8rem)/1 var(--font-display); color: var(--c-ink); }
+  .dark { background: rgb(255 255 255 / 0.12); border-color: rgb(255 255 255 / 0.12); }
+  .dark .stat { background: var(--c-ink); }
+  .dark dt { color: var(--c-on-dark-muted); }
+  .dark dd { color: #fff; }
+</style>

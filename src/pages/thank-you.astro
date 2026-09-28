@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { contact, site, telUrl, whatsappUrl } from '../config/site.config';
+---
+<BaseLayout title={`תודה, קיבלנו את הפנייה | ${site.shortName}`} description="הפנייה התקבלה. רוני יחזור אליכם בהקדם." noindex>
+  <section class="thanks blueprint on-dark">
+    <div class="narrow inner">
+      <span class="seal" aria-hidden="true"><Icon name="check" size={40} /></span>
+      <h1>תודה, <span>קיבלנו.</span></h1>
+      <p class="lead">רוני יחזור אליכם בהקדם. אם זה דחוף, אל תחכו: התקשרו עכשיו.</p>
+      <div class="actions">
+        <a class="btn btn--lg" href={telUrl}><Icon name="phone" size={20} /><span class="ltr">{contact.phone}</span></a>
+        <a class="btn btn--wa btn--lg" href={whatsappUrl()} target="_blank" rel="noopener"><Icon name="whatsapp" size={20} />וואטסאפ<span class="visually-hidden"> (נפתח בחלון חדש)</span></a>
+      </div>
+      <p class="next">בינתיים: אם יש נזילה, סגרו את הברז הראשי. <a href="/emergency/">עוד הנחיות לדקות הראשונות</a>.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .thanks { color: #fff; min-height: 70svh; display: grid; place-items: center; padding-block: var(--space-9); text-align: center; }
+  .seal { display: inline-grid; place-items: center; width: 88px; height: 88px; border-radius: 50%; background: var(--c-orange); color: var(--c-ink); margin-bottom: var(--space-5); }
+  @media (prefers-reduced-motion: no-preference) { .seal { animation: pop 0.7s var(--ease) both; } }
+  @keyframes pop { from { transform: scale(0.5); opacity: 0; } }
+  h1 span { color: var(--c-orange); }
+  .lead { color: var(--c-on-dark-muted); }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin: var(--space-6) 0; }
+  .next { color: var(--c-on-dark-muted); }
+  .next a { color: #fff; }
+</style>

@@ -1,0 +1,131 @@
+---
+import '@fontsource-variable/rubik/wght.css';
+import '@fontsource-variable/assistant/wght.css';
+import '../styles/global.css';
+import rubik from '@fontsource-variable/rubik/files/rubik-hebrew-wght-normal.woff2?url';
+import assistant from '@fontsource-variable/assistant/files/assistant-hebrew-wght-normal.woff2?url';
+
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import MobileBar from '../components/MobileBar.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import { site, theme, contact, owner, social, images, services, areas, stats, analytics } from '../config/site.config';
+import { getImage } from 'astro:assets';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Extra JSON-LD objects for this page. */
+  schema?: object[];
+  noindex?: boolean;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, schema = [], noindex = false, ogType = 'website' } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const fullTitle = title.includes(site.shortName) ? title : `${title} | ${site.name}`;
+const og = await getImage({ src: images.hero, width: 1200, height: 630, format: 'jpg', fit: 'cover' });
+const ogUrl = new URL(og.src, site.url).href;
+// Demo sites are never indexed (see site.isDemo in the config)
+const robots = noindex || site.isDemo ? 'noindex, follow' : '';
+
+const c = theme.colors;
+const cssVars = `:root{--c-ink:${c.ink};--c-ink2:${c.ink2};--c-ink3:${c.ink3};--c-blue:${c.blue};--c-blue-soft:${c.blueSoft};--c-orange:${c.orange};--c-orange-deep:${c.orangeDeep};--c-orange-soft:${c.orangeSoft};--c-paper:${c.paper};--c-mist:${c.mist};--c-text:${c.text};--c-muted:${c.muted};--c-on-dark:${c.onDark};--c-on-dark-muted:${c.onDarkMuted};--c-line:${c.line};--c-whatsapp:${c.whatsapp};--c-success:${c.success};--c-error:${c.error};}`;
+
+const sameAs = Object.values(social).filter(Boolean);
+const businessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Plumber',
+  '@id': `${site.url}/#business`,
+  name: site.name,
+  description: `${site.tagline}. ${contact.availabilityLabel}.`,
+  url: site.url + '/',
+  telephone: contact.phoneHref,
+  email: contact.email,
+  image: ogUrl,
+  priceRange: '₪₪',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: contact.locality,
+    addressRegion: contact.region,
+    addressCountry: contact.country,
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: contact.geo.lat, longitude: contact.geo.lng },
+  areaServed: areas.map((a) => ({ '@type': 'City', name: a.name })),
+  ...(contact.is247
+    ? {
+        openingHoursSpecification: {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+          opens: '00:00',
+          closes: '23:59',
+        },
+      }
+    : {}),
+  aggregateRating: { '@type': 'AggregateRating', ratingValue: stats.rating, reviewCount: stats.reviewCount, bestRating: 5 },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'שירותי אינסטלציה',
+    itemListElement: services.map((s) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: s.title, url: `${site.url}/services/${s.slug}/` },
+      ...(s.priceFrom ? { priceSpecification: { '@type': 'PriceSpecification', minPrice: s.priceFrom, priceCurrency: 'ILS' } } : {}),
+    })),
+  },
+  founder: { '@type': 'Person', name: owner.name, jobTitle: owner.role },
+  ...(sameAs.length ? { sameAs } : {}),
+};
+const allSchema = [businessSchema, ...schema];
+---
+<!doctype html>
+<html lang={site.lang} dir={site.dir} class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {robots && <meta name="robots" content={robots} />}
+    <meta name="theme-color" content={theme.themeColor} />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content={site.locale} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preload" href={rubik} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={assistant} as="font" type="font/woff2" crossorigin />
+
+    <style set:html={cssVars}></style>
+    <script is:inline>document.documentElement.classList.remove('no-js');</script>
+
+    {allSchema.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">דלגו לתוכן הראשי</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <MobileBar />
+    <CookieConsent ga4={analytics.ga4} />
+    <script>
+      import '../scripts/site';
+    </script>
+  </body>
+</html>

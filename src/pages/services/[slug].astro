@@ -1,0 +1,199 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import FaqList from '../../components/FaqList.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import TestimonialCard from '../../components/TestimonialCard.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import {
+  services, areas, contact, site, formatPrice, formatDate, serviceBySlug, testimonialsFor, telUrl, type Service,
+} from '../../config/site.config';
+import { breadcrumbSchema, faqSchema, businessRef, home } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return services.map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
+}
+
+interface Props { service: Service }
+const { service: s } = Astro.props;
+const related = s.related.map(serviceBySlug).filter(Boolean) as Service[];
+const reviews = testimonialsFor({ service: s.slug }).slice(0, 2);
+const crumbs = [home, { label: 'שירותים', href: '/services/' }, { label: s.title }];
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: s.title,
+  serviceType: s.navTitle,
+  description: s.metaDescription,
+  url: `${site.url}/services/${s.slug}/`,
+  provider: businessRef,
+  areaServed: areas.map((a) => ({ '@type': 'City', name: a.name })),
+  ...(s.priceFrom
+    ? { offers: { '@type': 'Offer', priceCurrency: 'ILS', priceSpecification: { '@type': 'PriceSpecification', minPrice: s.priceFrom, priceCurrency: 'ILS' } } }
+    : {}),
+};
+---
+<BaseLayout
+  title={s.metaTitle}
+  description={s.metaDescription}
+  schema={[serviceSchema, breadcrumbSchema(crumbs), faqSchema(s.faqs)]}
+>
+  <PageHero
+    eyebrow={s.keyword}
+    title={s.title}
+    lead={s.intro}
+    crumbs={crumbs}
+    image={s.image}
+    imageAlt={s.imageAlt}
+    whatsappText={`שלום רוני, אשמח לעזרה בנושא ${s.navTitle}`}
+  >
+    <ul class="facts">
+      {s.priceFrom > 0 && <li><Icon name="tag" size={18} />החל מ-<strong>{formatPrice(s.priceFrom)}</strong></li>}
+      <li><Icon name="clock" size={18} />{s.duration}</li>
+      <li><Icon name="truck" size={18} />הגעה תוך {contact.arrival.min}-{contact.arrival.max} דק'</li>
+    </ul>
+  </PageHero>
+
+  {s.urgent && (
+    <div class="urgent">
+      <div class="container urgent-inner">
+        <Icon name="alert" size={22} />
+        <p>זה קורה עכשיו? <a href="/emergency/">הנחיות לדקות הראשונות</a>, או פשוט <a href={telUrl}>התקשרו: <span class="ltr">{contact.phone}</span></a></p>
+      </div>
+    </div>
+  )}
+
+  <section class="section">
+    <div class="container layout">
+      <div class="main">
+        <h2>מתי מזמינים {s.navTitle}?</h2>
+        <ul class="check-list when">
+          {s.whenToCall.map((w) => <li><Icon name="check" size={20} />{w}</li>)}
+        </ul>
+
+        <h2>איך רוני עובד</h2>
+        <ol class="how">
+          {s.howWeWork.map((h, i) => (
+            <li>
+              <span class="n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <div><h3>{h.title}</h3><p>{h.text}</p></div>
+            </li>
+          ))}
+        </ol>
+
+        <h2>מה כלול</h2>
+        <ul class="included">
+          {s.included.map((it) => <li><Icon name="shield" size={20} />{it}</li>)}
+        </ul>
+
+        {s.priceFrom > 0 && (
+          <div class="price-box">
+            <div>
+              <p class="pb-label">מחיר</p>
+              <p class="pb-price">החל מ-<strong>{formatPrice(s.priceFrom)}</strong> <span>כולל מע"מ</span></p>
+              <p class="pb-note">{s.priceNote}</p>
+            </div>
+            <a class="link-arrow" href="/prices/">למחירון המלא<Icon name="arrow" size={18} /></a>
+          </div>
+        )}
+
+        <h2>שאלות נפוצות על {s.navTitle}</h2>
+        <FaqList items={s.faqs} />
+
+        <p class="updated">עודכן לאחרונה: {formatDate(site.contentUpdated)}</p>
+      </div>
+
+      <aside class="side">
+        <div class="side-card">
+          <h2 class="side-title">צריכים {s.navTitle}?</h2>
+          <p class="muted">השאירו פרטים ורוני יחזור אליכם, או התקשרו עכשיו: <a href={telUrl} class="ltr">{contact.phone}</a></p>
+          <ContactForm topic={s.navTitle} id={`form-${s.slug}`} compact />
+        </div>
+        <div class="side-areas">
+          <h2 class="side-title">{s.navTitle} באזור שלכם</h2>
+          <ul>
+            {areas.map((a) => <li><a href={`/areas/${a.slug}/`}>{a.name}</a></li>)}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  {reviews.length > 0 && (
+    <section class="section section--mist">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">המלצות</p>
+          <h2>לקוחות מספרים על {s.navTitle}</h2>
+        </div>
+        <div class="grid grid--2">{reviews.map((t) => <TestimonialCard t={t} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">שירותים קשורים</p>
+        <h2>עוד דברים שרוני עושה</h2>
+      </div>
+      <div class="grid grid--3">{related.map((r) => <ServiceCard service={r} />)}</div>
+    </div>
+  </section>
+
+  <CtaBand whatsappText={`שלום רוני, אשמח לעזרה בנושא ${s.navTitle}`} />
+</BaseLayout>
+
+<style>
+  .facts { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .facts li {
+    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 999px;
+    background: rgb(255 255 255 / 0.08); border: 1px solid rgb(255 255 255 / 0.15); font-size: 0.95rem;
+  }
+  .facts :global(svg) { color: var(--c-orange); }
+
+  .urgent { background: var(--c-orange-soft); border-bottom: 1px solid #FFD7B8; }
+  .urgent-inner { display: flex; align-items: center; gap: 0.75rem; padding-block: 0.9rem; color: var(--c-orange-deep); }
+  .urgent p { margin: 0; color: var(--c-ink); }
+  .urgent a { color: var(--c-orange-deep); font-weight: 700; }
+
+  .layout { display: grid; gap: var(--space-7); }
+  @media (min-width: 1000px) { .layout { grid-template-columns: 1fr 380px; align-items: start; } }
+  .main h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); margin-top: var(--space-7); }
+  .main h2:first-child { margin-top: 0; }
+  .when { grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .when { grid-template-columns: 1fr 1fr; } }
+  .how { list-style: none; padding: 0; display: grid; gap: 1rem; }
+  .how li { display: flex; gap: 1rem; padding: 1.1rem 1.2rem; border-radius: var(--radius); background: var(--c-mist); }
+  .how .n { font: 800 1.4rem/1 var(--font-display); color: var(--c-orange-deep); min-width: 2.2rem; padding-top: 0.2rem; }
+  .how h3 { font-size: 1.1rem; margin-bottom: 0.25rem; }
+  .how p { margin: 0; color: var(--c-muted); }
+  .included { list-style: none; padding: 0; display: grid; gap: 0.6rem; }
+  .included li { display: flex; gap: 0.6rem; align-items: center; font-weight: 600; }
+  .included :global(svg) { color: var(--c-blue); flex: none; }
+
+  .price-box {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem;
+    margin-top: var(--space-6); padding: 1.4rem 1.5rem; border-radius: var(--radius-l);
+    background: var(--c-ink); color: #fff;
+  }
+  .price-box .link-arrow { color: var(--c-orange); }
+  .pb-label { margin: 0; color: var(--c-on-dark-muted); font-size: 0.9rem; }
+  .pb-price { margin: 0.2rem 0; font-size: 1.1rem; }
+  .pb-price strong { font: 800 2.2rem var(--font-display); color: var(--c-orange); }
+  .pb-price span { font-size: 0.9rem; color: var(--c-on-dark-muted); }
+  .pb-note { margin: 0; color: var(--c-on-dark-muted); font-size: 0.95rem; max-width: 36rem; }
+  .updated { margin-top: var(--space-6); font-size: 0.9rem; color: var(--c-muted); }
+
+  .side { display: grid; gap: var(--space-5); }
+  @media (min-width: 1000px) { .side { position: sticky; top: calc(var(--top-offset) + 1rem); } }
+  .side-card { padding: 1.4rem; border-radius: var(--radius-l); border: 1px solid var(--c-line); box-shadow: var(--shadow-2); background: #fff; }
+  .side-title { font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .side-areas { padding: 1.2rem 1.4rem; border-radius: var(--radius-l); background: var(--c-mist); }
+  .side-areas ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .side-areas a { display: inline-block; padding: 0.35rem 0.8rem; border-radius: 999px; background: #fff; border: 1px solid var(--c-line); color: var(--c-ink); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+  .side-areas a:hover { border-color: var(--c-orange); }
+</style>

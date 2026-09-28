@@ -1,0 +1,50 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { formatPrice, type Service } from '../config/site.config';
+
+interface Props { service: Service; headingLevel?: 'h2' | 'h3' }
+const { service: s, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+---
+<article class="svc-card">
+  <div class="img">
+    <div class="img-clip"><Image src={s.image} alt="" widths={[400, 640]} sizes="(min-width: 1000px) 380px, (min-width: 720px) 50vw, 100vw" /></div>
+    <span class="icon-chip icon-chip--orange chip"><Icon name={s.icon} /></span>
+  </div>
+  <div class="body">
+    <H class="title"><a href={`/services/${s.slug}/`}>{s.title}</a></H>
+    <p>{s.short}</p>
+    <div class="foot">
+      {s.priceFrom > 0 && <span class="price">החל מ-<strong>{formatPrice(s.priceFrom)}</strong></span>}
+      <span class="more" aria-hidden="true"><Icon name="arrow" size={20} /></span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .svc-card {
+    position: relative; display: flex; height: 100%; flex-direction: column; background: #fff; border: 1px solid var(--c-line);
+    border-radius: var(--radius-l); overflow: hidden; box-shadow: var(--shadow-1);
+    transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), border-color 220ms;
+  }
+  .svc-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); border-color: transparent; }
+  .img { position: relative; aspect-ratio: 16 / 10; background: var(--c-mist); }
+  .img-clip { position: absolute; inset: 0; overflow: hidden; }
+  .img :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--ease); }
+  .svc-card:hover .img :global(img) { transform: scale(1.04); }
+  .chip { position: absolute; inset-inline-start: 1.1rem; bottom: -24px; box-shadow: 0 6px 16px -6px rgb(10 34 64 / 0.35); background: #fff; }
+  .body { padding: 2.1rem 1.35rem 1.35rem; display: flex; flex-direction: column; flex: 1; }
+  .title { font-size: 1.25rem; margin-bottom: 0.5rem; }
+  .title a { color: var(--c-ink); text-decoration: none; }
+  /* Whole card is clickable through the title link */
+  .title a::after { content: ''; position: absolute; inset: 0; }
+  .body p { color: var(--c-muted); margin-bottom: 1rem; }
+  .foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+  .price { font-size: 0.95rem; color: var(--c-muted); }
+  .price strong { color: var(--c-ink); font-family: var(--font-display); font-size: 1.1rem; }
+  .more { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--c-mist); color: var(--c-ink); transition: background-color 200ms, color 200ms; }
+  .svc-card:hover .more { background: var(--c-orange); }
+  .svc-card:focus-within { outline: 3px solid var(--c-orange); outline-offset: 3px; }
+  .title a:focus-visible { outline: none; }
+</style>

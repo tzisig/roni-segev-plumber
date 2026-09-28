@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import PriceTable from '../components/PriceTable.astro';
+import Icon from '../components/Icon.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { priceNotes, site, contact, formatDate } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'מחירון' }];
+---
+<BaseLayout
+  title="מחירון אינסטלטור בחיפה והקריות"
+  description={`מחירון אינסטלטור שקוף: פתיחת סתימות, איתור נזילות, תיקון והחלפת דודים, התקנות, מז"ח וצנרת לשיפוץ. מחירי החל מ-, כולל מע"מ.`}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    eyebrow="מחירון"
+    title="כמה זה עולה? הנה המחירים"
+    lead={`בלי כוכביות ובלי הפתעות. אלה מחירי ה"החל מ-" שלנו לעבודות הנפוצות. המחיר הסופי נקבע אחרי אבחון, ונאמר לכם לפני שמתחילים.`}
+    crumbs={crumbs}
+  />
+  <section class="section">
+    <div class="container">
+      <h2 class="visually-hidden">מחירים לפי סוג עבודה</h2>
+      <PriceTable />
+      <div class="notes">
+        <Icon name="receipt" size={24} />
+        <ul>
+          {priceNotes.map((n) => <li>{n}</li>)}
+          <li>{contact.afterHoursNote}</li>
+        </ul>
+      </div>
+      <p class="updated">המחירון עודכן לאחרונה: {formatDate(site.contentUpdated)}</p>
+    </div>
+  </section>
+  <CtaBand title="רוצים מחיר מדויק?" text="שלחו תמונה בוואטסאפ ותקבלו הערכת מחיר, או התקשרו ורוני יסביר בטלפון." whatsappText="שלום רוני, אשמח להערכת מחיר. מצרף תמונה:" />
+</BaseLayout>
+
+<style>
+  .notes { display: flex; gap: 1rem; margin-top: var(--space-6); padding: 1.25rem 1.4rem; border-radius: var(--radius-l); background: var(--c-orange-soft); }
+  .notes :global(svg) { flex: none; color: var(--c-orange-deep); margin-top: 0.2rem; }
+  .notes ul { margin: 0; padding-inline-start: 1rem; display: grid; gap: 0.4rem; }
+  .updated { margin-top: var(--space-4); color: var(--c-muted); font-size: 0.9rem; }
+</style>

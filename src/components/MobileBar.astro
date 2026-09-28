@@ -1,0 +1,34 @@
+---
+// Sticky call bar on mobile: call and WhatsApp are always one tap away.
+import Icon from './Icon.astro';
+import { contact, telUrl, whatsappUrl } from '../config/site.config';
+---
+<div class="mobile-bar" role="region" aria-label="יצירת קשר מהירה">
+  <a class="mb-call" href={telUrl}>
+    <Icon name="phone" size={22} />
+    <span class="mb-text"><strong>התקשרו עכשיו</strong><span class="ltr">{contact.phone}</span></span>
+  </a>
+  <a class="mb-wa" href={whatsappUrl()} target="_blank" rel="noopener" aria-label="וואטסאפ (נפתח בחלון חדש)">
+    <Icon name="whatsapp" size={22} />
+    <strong>וואטסאפ</strong>
+  </a>
+</div>
+
+<style>
+  .mobile-bar {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 80;
+    display: grid; grid-template-columns: 1.6fr 1fr; gap: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    background: rgb(255 255 255 / 0.96); backdrop-filter: blur(8px);
+    border-top: 1px solid var(--c-line); box-shadow: 0 -10px 30px -18px rgb(10 34 64 / 0.45);
+  }
+  .mobile-bar a {
+    display: flex; align-items: center; justify-content: center; gap: 0.55rem; min-height: 52px;
+    border-radius: 14px; text-decoration: none; font-family: var(--font-display);
+  }
+  .mb-call { background: var(--c-orange); color: var(--c-ink); }
+  .mb-text { display: grid; line-height: 1.1; font-size: 0.8rem; }
+  .mb-text strong { font-size: 1.05rem; }
+  .mb-wa { background: var(--c-whatsapp); color: #fff; }
+  @media (min-width: 900px) { .mobile-bar { display: none; } }
+</style>

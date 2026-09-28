@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+import Icon from '../components/Icon.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { gallery, galleryCategories, serviceBySlug } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'עבודות לפני ואחרי' }];
+---
+<BaseLayout
+  title="עבודות לפני ואחרי: שיפוצים, צנרת והתקנות"
+  description="גלריית עבודות לפני ואחרי של רוני שגב בחיפה והקריות: שיפוצי חדרי רחצה, החלפת צנרת, מטבחים והתקנות. מה הייתה הבעיה ואיך פתרנו אותה."
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    eyebrow="גלריית עבודות"
+    title="לפני ואחרי, מהשטח"
+    lead="גררו את הידית בכל תמונה כדי לראות איך המקום נראה לפני העבודה ואחריה. לכל פרויקט: מה הייתה הבעיה, מה עשינו וכמה זמן זה לקח."
+    crumbs={crumbs}
+  />
+
+  <section class="section">
+    <div class="container">
+      <div class="filters" role="group" aria-label="סינון לפי סוג עבודה" data-filters hidden>
+        <button type="button" aria-pressed="true" data-filter="all">הכול</button>
+        {galleryCategories.map((c) => <button type="button" aria-pressed="false" data-filter={c.id}>{c.label}</button>)}
+      </div>
+      <p class="visually-hidden" aria-live="polite" data-filter-status></p>
+
+      <div class="projects">
+        {gallery.map((g, i) => {
+          const svc = serviceBySlug(g.service);
+          return (
+            <article class="project" data-category={g.category}>
+              <BeforeAfter before={g.before} after={g.after} beforeAlt={g.beforeAlt} afterAlt={g.afterAlt} label={`השוואת לפני ואחרי: ${g.title}`} sizes="(min-width: 1000px) 580px, 100vw" eager={i === 0} />
+              <div class="info">
+                <p class="loc"><Icon name="pin" size={16} />{g.location} · {g.duration}</p>
+                <h2>{g.title}</h2>
+                <dl>
+                  <div><dt>הבעיה</dt><dd>{g.problem}</dd></div>
+                  <div><dt>הפתרון</dt><dd>{g.solution}</dd></div>
+                </dl>
+                {svc && <a class="link-arrow" href={`/services/${svc.slug}/`}>{svc.navTitle}<Icon name="arrow" size={18} /></a>}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+  <CtaBand title="רוצים תוצאה כזאת גם אצלכם?" whatsappText="שלום רוני, ראיתי את העבודות באתר ואשמח להצעת מחיר" />
+</BaseLayout>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: var(--space-6); }
+  .filters button {
+    min-height: 44px; padding: 0.5rem 1.2rem; border-radius: 999px; border: 1.5px solid var(--c-line);
+    background: #fff; color: var(--c-ink); font: 600 1rem var(--font-display); cursor: pointer;
+  }
+  .filters button[aria-pressed='true'] { background: var(--c-ink); border-color: var(--c-ink); color: #fff; }
+  .projects { display: grid; gap: var(--space-7); }
+  .project { display: grid; gap: var(--space-5); align-items: center; }
+  .project[hidden] { display: none; }
+  @media (min-width: 1000px) {
+    .project { grid-template-columns: 1.1fr 1fr; gap: var(--space-7); }
+    .project:nth-child(even) .info { order: -1; }
+  }
+  .loc { display: flex; align-items: center; gap: 0.4rem; color: var(--c-orange-deep); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; }
+  h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); }
+  dl { margin: 0 0 var(--space-4); display: grid; gap: 0.75rem; }
+  dt { font: 700 0.95rem var(--font-display); color: var(--c-muted); }
+  dd { margin: 0; font-size: 1.08rem; }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-filters]');
+  const status = document.querySelector<HTMLElement>('[data-filter-status]');
+  if (bar) {
+    bar.hidden = false;
+    const buttons = bar.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const projects = document.querySelectorAll<HTMLElement>('[data-category]');
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const f = btn.dataset.filter;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        let shown = 0;
+        projects.forEach((p) => {
+          const show = f === 'all' || p.dataset.category === f;
+          p.hidden = !show;
+          if (show) shown++;
+        });
+        if (status) status.textContent = `מוצגות ${shown} עבודות`;
+      }),
+    );
+  }
+</script>

@@ -1,0 +1,112 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import StatsRow from '../components/StatsRow.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { owner, images, whyUs, areas, site, contact } from '../config/site.config';
+import { breadcrumbSchema, businessRef, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'אודות רוני' }];
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: owner.name,
+  jobTitle: owner.role,
+  worksFor: businessRef,
+  hasCredential: owner.certifications.map((c) => ({ '@type': 'EducationalOccupationalCredential', name: c })),
+  url: `${site.url}/about/`,
+};
+---
+<BaseLayout
+  title={`אודות ${owner.name}, אינסטלטור מוסמך בחיפה`}
+  description={`${owner.name}, אינסטלטור מוסמך עם רישיון ${owner.licenseNo}, עובד בחיפה והקריות מאז ${owner.since}. הסיפור, ההסמכות והעקרונות שמאחורי כל ביקור.`}
+  schema={[personSchema, breadcrumbSchema(crumbs)]}
+>
+  <PageHero
+    eyebrow="אודות"
+    title={`נעים מאוד, אני ${owner.firstName}`}
+    lead={owner.shortBio}
+    crumbs={crumbs}
+    image={owner.image}
+    imageAlt={owner.imageAlt}
+  />
+
+  <section class="section">
+    <div class="container story-grid">
+      <div class="story">
+        <p class="eyebrow">הסיפור</p>
+        <h2>למה דווקא אינסטלציה</h2>
+        {owner.story.map((p) => <p class="para">{p}</p>)}
+      </div>
+      <aside class="certs">
+        <h2 class="certs-title"><Icon name="badge" size={26} />הסמכות ורישיונות</h2>
+        <ul>
+          {owner.certifications.map((c) => <li><Icon name="check" size={20} />{c}</li>)}
+        </ul>
+        <p class="license">מספר רישיון: <strong>{owner.licenseNo}</strong></p>
+      </aside>
+    </div>
+    <div class="container stats-wrap"><StatsRow /></div>
+  </section>
+
+  <section class="section section--mist">
+    <div class="container van-grid">
+      <div class="van">
+        <Image src={images.van} alt={images.vanAlt} widths={[480, 720, 960]} sizes="(min-width: 1000px) 560px, 100vw" />
+      </div>
+      <div>
+        <p class="eyebrow">הרכב</p>
+        <h2>בית מלאכה על גלגלים</h2>
+        <p class="para">הרכב יוצא כל בוקר מ{contact.baseArea} עם מלאי של החלקים הנפוצים, מצלמה תרמית, ציוד אקוסטי לאיתור נזילות, מצלמת ביוב ומכונות לפתיחת סתימות. ככה רוב התקלות נפתרות בביקור אחד, בלי "אני קופץ לחנות ומיד חוזר".</p>
+        <p class="para">הוא מכסה את כל האזור: {areas.map((a) => a.name).join(', ')}.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">העקרונות</p>
+        <h2>איך רוני עובד</h2>
+      </div>
+      <ul class="principles">
+        {whyUs.map((w, i) => (
+          <li class="reveal" data-delay={String(i % 3)}>
+            <span class="icon-chip icon-chip--orange"><Icon name={w.icon} /></span>
+            <h3>{w.title}</h3>
+            <p>{w.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand title={`רוצים לדבר עם ${owner.firstName}?`} />
+</BaseLayout>
+
+<style>
+  .story-grid { display: grid; gap: var(--space-7); align-items: start; }
+  @media (min-width: 1000px) { .story-grid { grid-template-columns: 1.4fr 1fr; } }
+  .para { font-size: 1.1rem; }
+  .certs { padding: 1.6rem; border-radius: var(--radius-l); background: var(--c-ink); color: #fff; }
+  .certs-title { display: flex; align-items: center; gap: 0.6rem; font-size: 1.3rem; }
+  .certs-title :global(svg) { color: var(--c-orange); }
+  .certs ul { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 0.8rem; }
+  .certs li { display: flex; gap: 0.6rem; align-items: flex-start; }
+  .certs li :global(svg) { color: var(--c-orange); flex: none; margin-top: 0.25rem; }
+  .license { margin: 0; padding-top: 1rem; border-top: 1px solid rgb(255 255 255 / 0.15); color: var(--c-on-dark-muted); }
+  .license strong { color: #fff; }
+  .stats-wrap { margin-top: var(--space-7); }
+  .van-grid { display: grid; gap: var(--space-6); align-items: center; }
+  @media (min-width: 1000px) { .van-grid { grid-template-columns: 1fr 1fr; } }
+  .van { border-radius: var(--radius-l); overflow: hidden; box-shadow: var(--shadow-2); }
+  .van :global(img) { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .principles { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); }
+  @media (min-width: 720px) { .principles { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .principles { grid-template-columns: repeat(3, 1fr); } }
+  .principles li { padding: 1.4rem; border-radius: var(--radius-l); border: 1px solid var(--c-line); }
+  .principles h3 { margin: 0.9rem 0 0.4rem; font-size: 1.15rem; }
+  .principles p { margin: 0; color: var(--c-muted); }
+</style>

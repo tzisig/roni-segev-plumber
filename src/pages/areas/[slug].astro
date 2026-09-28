@@ -1,0 +1,156 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import AreaMap from '../../components/AreaMap.astro';
+import TestimonialCard from '../../components/TestimonialCard.astro';
+import BeforeAfter from '../../components/BeforeAfter.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { areas, services, gallery, site, testimonialsFor, formatPrice, type Area } from '../../config/site.config';
+import { breadcrumbSchema, businessRef, home } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return areas.map((a) => ({ params: { slug: a.slug }, props: { area: a } }));
+}
+
+interface Props { area: Area }
+const { area: a } = Astro.props;
+const reviews = testimonialsFor({ area: a.slug });
+const work = gallery.filter((g) => g.area === a.slug).slice(0, 2);
+const crumbs = [home, { label: 'אזורי שירות', href: '/areas/' }, { label: a.name }];
+
+const pageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `אינסטלטור ${a.nameIn}`,
+  serviceType: 'אינסטלציה',
+  url: `${site.url}/areas/${a.slug}/`,
+  provider: businessRef,
+  areaServed: { '@type': 'City', name: a.name },
+};
+---
+<BaseLayout title={a.metaTitle} description={a.metaDescription} schema={[pageSchema, breadcrumbSchema(crumbs)]}>
+  <PageHero
+    eyebrow={`אינסטלטור ${a.nameIn}`}
+    title={`אינסטלטור ${a.nameIn.replace(' ', '\u00a0')}, 24 שעות ביממה`}
+    lead={a.intro}
+    crumbs={crumbs}
+    image={a.image}
+    imageAlt={a.imageAlt}
+    whatsappText={`שלום רוני, אני ${a.nameIn} ואשמח לעזרה עם תקלת אינסטלציה`}
+  >
+    <p class="eta"><Icon name="truck" size={20} />זמן הגעה משוער {a.nameIn}: <strong>{a.eta.min}-{a.eta.max} דקות</strong></p>
+  </PageHero>
+
+  <section class="section">
+    <div class="container layout">
+      <div class="main">
+        <p class="eyebrow">מה שחשוב לדעת {a.nameIn}</p>
+        <h2>הצנרת {a.nameIn}: מה אנחנו פוגשים בשטח</h2>
+        {a.local.map((p) => <p class="para">{p}</p>)}
+
+        <h2 class="spaced">התקלות הנפוצות {a.nameIn}</h2>
+        <div class="issues">
+          {a.commonIssues.map((c) => (
+            <div class="issue">
+              <span class="icon-chip icon-chip--orange"><Icon name="wrench" /></span>
+              <div><h3>{c.title}</h3><p>{c.text}</p></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <aside class="side">
+        <h2 class="side-title">שכונות שאנחנו מגיעים אליהן</h2>
+        <ul class="hoods">{a.neighborhoods.map((n) => <li>{n}</li>)}</ul>
+        <p class="muted small">לא מצאתם את השכונה שלכם? אנחנו מגיעים לכל {a.name}.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--mist">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">שירותים</p>
+        <h2>כל שירותי האינסטלציה {a.nameIn}</h2>
+      </div>
+      <ul class="svc-links">
+        {services.map((s) => (
+          <li>
+            <a href={`/services/${s.slug}/`}>
+              <span class="icon-chip"><Icon name={s.icon} /></span>
+              <span class="t"><strong>{s.navTitle}</strong>{s.priceFrom > 0 && <span>החל מ-{formatPrice(s.priceFrom)}</span>}</span>
+              <Icon name="arrow" size={18} class="arr" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {(reviews.length > 0 || work.length > 0) && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">מהשטח</p>
+          <h2>עבודות והמלצות {a.nameIn}</h2>
+        </div>
+        <div class="grid grid--2">
+          {work.map((g) => (
+            <article>
+              <BeforeAfter before={g.before} after={g.after} beforeAlt={g.beforeAlt} afterAlt={g.afterAlt} label={`השוואת לפני ואחרי: ${g.title}`} sizes="(min-width: 1000px) 580px, 100vw" />
+              <h3 class="work-title">{g.title}</h3>
+              <p class="muted">{g.solution}</p>
+            </article>
+          ))}
+          {reviews.map((t) => <TestimonialCard t={t} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section section--dark blueprint">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">אזורי שירות</p>
+        <h2>גם בשכנות: שאר האזורים שלנו</h2>
+      </div>
+      <AreaMap current={a.slug} />
+    </div>
+  </section>
+
+  <CtaBand title={`תקלה ${a.nameIn}? רוני בדרך.`} whatsappText={`שלום רוני, אני ${a.nameIn} ואשמח לעזרה`} />
+</BaseLayout>
+
+<style>
+  .eta { display: inline-flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0 0; padding: 0.5rem 0.9rem; border-radius: 999px; background: rgb(255 122 26 / 0.15); border: 1px solid rgb(255 122 26 / 0.4); }
+  .eta :global(svg) { color: var(--c-orange); }
+  .layout { display: grid; gap: var(--space-7); }
+  @media (min-width: 1000px) { .layout { grid-template-columns: 1fr 340px; align-items: start; } }
+  .main h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); }
+  .main .spaced { margin-top: var(--space-7); }
+  .para { font-size: 1.1rem; }
+  .issues { display: grid; gap: 1rem; }
+  .issue { display: flex; gap: 1rem; padding: 1.1rem 1.2rem; border-radius: var(--radius); border: 1px solid var(--c-line); }
+  .issue h3 { font-size: 1.1rem; margin-bottom: 0.25rem; }
+  .issue p { margin: 0; color: var(--c-muted); }
+  .side { padding: 1.5rem; border-radius: var(--radius-l); background: var(--c-mist); }
+  @media (min-width: 1000px) { .side { position: sticky; top: calc(var(--top-offset) + 1rem); } }
+  .side-title { font-size: 1.25rem; }
+  .hoods { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .hoods li { padding: 0.35rem 0.8rem; border-radius: 999px; background: #fff; border: 1px solid var(--c-line); font-weight: 600; font-size: 0.95rem; }
+  .small { font-size: 0.9rem; margin: 0; }
+  .svc-links { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
+  @media (min-width: 720px) { .svc-links { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .svc-links { grid-template-columns: repeat(4, 1fr); } }
+  .svc-links a {
+    display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1rem; border-radius: var(--radius);
+    background: #fff; border: 1px solid var(--c-line); color: var(--c-ink); text-decoration: none; height: 100%;
+    transition: border-color 180ms, transform 180ms var(--ease);
+  }
+  .svc-links a:hover { border-color: var(--c-orange); transform: translateY(-2px); }
+  .svc-links .t { display: grid; line-height: 1.3; }
+  .svc-links .t span { font-size: 0.875rem; color: var(--c-muted); }
+  .svc-links :global(.arr) { margin-inline-start: auto; color: var(--c-muted); flex: none; }
+  .work-title { font-size: 1.15rem; margin: 1rem 0 0.25rem; }
+</style>

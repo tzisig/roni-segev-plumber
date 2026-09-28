@@ -1,0 +1,42 @@
+---
+// Four steps joined by a pipe line with fittings at each step.
+import { processSteps } from '../config/site.config';
+interface Props { dark?: boolean }
+const { dark = false } = Astro.props;
+---
+<ol class:list={['steps', { dark }]}>
+  {processSteps.map((s, i) => (
+    <li class="step reveal" data-delay={String(i)}>
+      <span class="fitting" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+      <h3>{s.title}</h3>
+      <p>{s.text}</p>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-5); position: relative; counter-reset: s; }
+  .step { position: relative; padding-inline-start: 4.5rem; }
+  .step::before {
+    /* vertical pipe on mobile */
+    content: ''; position: absolute; inset-inline-start: 1.55rem; top: 3.2rem; bottom: calc(-1 * var(--space-5));
+    width: 8px; background: var(--c-line); border-radius: 4px;
+  }
+  .step:last-child::before { display: none; }
+  .fitting {
+    position: absolute; inset-inline-start: 0; top: 0; display: grid; place-items: center;
+    width: 3.6rem; height: 3.2rem; border-radius: 10px; background: var(--c-ink); color: var(--c-orange);
+    font: 800 1.15rem var(--font-display); box-shadow: inset 0 -4px 0 rgb(255 255 255 / 0.12);
+  }
+  h3 { margin-bottom: 0.4rem; padding-top: 0.35rem; }
+  p { color: var(--c-muted); margin: 0; }
+  .dark p { color: var(--c-on-dark-muted); }
+  .dark .step::before { background: rgb(255 255 255 / 0.15); }
+  .dark .fitting { background: var(--c-orange); color: var(--c-ink); }
+
+  @media (min-width: 900px) {
+    .steps { grid-template-columns: repeat(4, 1fr); gap: var(--space-5); }
+    .step { padding-inline-start: 0; padding-top: 4.6rem; }
+    .step::before { inset-inline-start: 3.6rem; inset-inline-end: calc(-1 * var(--space-5)); top: 1.3rem; bottom: auto; width: auto; height: 8px; }
+  }
+</style>

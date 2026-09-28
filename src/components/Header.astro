@@ -1,0 +1,152 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { nav, contact, telUrl, whatsappUrl, services } from '../config/site.config';
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+<div class="site-top" data-header>
+  <!-- Sticky emergency strip: always visible, one tap to call -->
+  <div class="emergency-strip">
+    <div class="container strip-inner">
+      <p class="strip-text">
+        <span class="live-dot" aria-hidden="true"></span>
+        <strong class="strip-long">{contact.availabilityLabel}</strong>
+        <strong class="strip-short">זמינים 24/7</strong>
+        <span class="strip-extra">· הגעה תוך {contact.arrival.min}-{contact.arrival.max} דקות בחיפה והקריות</span>
+      </p>
+      <a class="strip-call" href={telUrl}>
+        <Icon name="phone" size={16} />
+        <span>חירום: <span class="ltr">{contact.phone}</span></span>
+      </a>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <Logo />
+
+      <nav class="nav-desktop" aria-label="ניווט ראשי">
+        <ul>
+          {nav.filter((n) => n.href !== '/contact/').map((n) => (
+            <li><a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="actions">
+        <a class="btn btn--wa act-wa" href={whatsappUrl()} target="_blank" rel="noopener" aria-label="וואטסאפ לרוני (נפתח בחלון חדש)">
+          <Icon name="whatsapp" size={20} />
+          <span class="act-label">וואטסאפ</span>
+        </a>
+        <a class="btn act-call" href={telUrl} aria-label={`התקשרו ${contact.phone}`}>
+          <Icon name="phone" size={20} />
+          <span class="act-label ltr">{contact.phone}</span>
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-toggle>
+          <span class="visually-hidden">תפריט</span>
+          <Icon name="menu" size={26} class="i-open" />
+          <Icon name="close" size={26} class="i-close" />
+        </button>
+      </div>
+    </div>
+
+    <nav class="nav-mobile" id="mobile-nav" aria-label="ניווט ראשי" hidden data-mobile-nav>
+      <div class="container">
+        <ul class="m-main">
+          <li><a href="/" aria-current={path === '/' ? 'page' : undefined}>דף הבית</a></li>
+          {nav.map((n) => (
+            <li><a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a></li>
+          ))}
+          <li><a href="/emergency/" class="m-emergency">חירום: מה עושים עכשיו?</a></li>
+        </ul>
+        <p class="m-label">שירותים</p>
+        <ul class="m-services">
+          {services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.navTitle}</a></li>)}
+        </ul>
+      </div>
+    </nav>
+  </header>
+</div>
+
+<style>
+  .site-top { position: sticky; top: 0; z-index: 90; }
+
+  .emergency-strip { background: var(--c-orange); color: var(--c-ink); font-size: 0.9rem; }
+  .strip-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 38px; }
+  .strip-text { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
+  .strip-text .live-dot { background: var(--c-ink); animation: none; box-shadow: none; }
+  .strip-extra, .strip-long { display: none; }
+  @media (min-width: 560px) { .strip-long { display: inline; } .strip-short { display: none; } }
+  .strip-call { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--c-ink); font-weight: 800; font-family: var(--font-display); text-decoration: none; white-space: nowrap; }
+  .strip-call:hover { text-decoration: underline; }
+  @media (min-width: 760px) { .strip-extra { display: inline; } }
+
+  .header {
+    background: rgb(255 255 255 / 0.94);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms, box-shadow 200ms;
+  }
+  :global(.is-scrolled) .header { border-bottom-color: var(--c-line); box-shadow: 0 8px 24px -18px rgb(10 34 64 / 0.4); }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 72px; }
+
+  .nav-desktop { display: none; }
+  .nav-desktop ul { display: flex; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
+  .nav-desktop a {
+    display: block; padding: 0.5rem 0.7rem; border-radius: 8px; color: var(--c-ink); text-decoration: none;
+    font: 600 0.98rem/1.2 var(--font-display); position: relative;
+  }
+  .nav-desktop a:hover { background: var(--c-mist); }
+  .nav-desktop a[aria-current='page']::after {
+    content: ''; position: absolute; inset-inline: 0.7rem; bottom: 0.15rem; height: 3px; border-radius: 2px; background: var(--c-orange);
+  }
+
+  .actions { display: flex; align-items: center; gap: 0.5rem; }
+  .actions .btn { min-height: 46px; padding: 0.5rem 1rem; font-size: 1rem; }
+  .act-wa { display: none; }
+  .act-label { display: none; }
+  .act-call { width: 46px; padding: 0 !important; }
+
+  .menu-toggle {
+    display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px;
+    border: 1.5px solid var(--c-line); background: #fff; color: var(--c-ink); cursor: pointer;
+  }
+  .menu-toggle :global(.i-close) { display: none; }
+  .menu-toggle[aria-expanded='true'] :global(.i-open) { display: none; }
+  .menu-toggle[aria-expanded='true'] :global(.i-close) { display: block; }
+  .menu-toggle :global(svg) { grid-area: 1 / 1; }
+
+  .nav-mobile {
+    position: fixed; inset: 110px 0 0 0; background: #fff; overflow-y: auto; padding-block: 1rem 6rem;
+    border-top: 1px solid var(--c-line);
+  }
+  .nav-mobile ul { list-style: none; margin: 0; padding: 0; }
+  .m-main a {
+    display: block; padding: 0.85rem 0; border-bottom: 1px solid var(--c-line);
+    font: 700 1.25rem/1.2 var(--font-display); color: var(--c-ink); text-decoration: none;
+  }
+  .m-main a[aria-current='page'] { color: var(--c-orange-deep); }
+  .m-emergency { color: var(--c-orange-deep) !important; }
+  .m-label { margin: 1.5rem 0 0.5rem; font: 600 0.85rem var(--font-display); color: var(--c-muted); }
+  .m-services { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .m-services a {
+    display: block; padding: 0.7rem 0.8rem; border-radius: 10px; background: var(--c-mist);
+    color: var(--c-ink); text-decoration: none; font-weight: 600; font-size: 0.95rem;
+  }
+
+  @media (min-width: 640px) {
+    .act-wa { display: inline-flex; }
+  }
+  @media (min-width: 1180px) {
+    .nav-desktop { display: block; }
+    .menu-toggle { display: none; }
+    .act-label { display: inline; }
+    .act-call { width: auto; padding: 0.5rem 1.1rem !important; }
+  }
+  @media (min-width: 1180px) and (max-width: 1300px) {
+    .act-wa .act-label { display: none; }
+    .act-wa { width: 46px; padding: 0 !important; }
+  }
+</style>
